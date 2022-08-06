@@ -4,21 +4,21 @@
 #include "SDL/SDL_mixer.h"
 #include "SDL/SDL_ttf.h"
 
-SDL_Surface *MultiSpacc_GetWindow( int Width, int Height, int Bits, Uint32 Flags ) {
+MultiSpacc_Window *MultiSpacc_SetWindow( int Width, int Height, int Bits, Uint32 Flags ) {
 	return SDL_SetVideoMode( Width, Height, Bits, Flags );
 }
-SDL_Surface *MultiSpacc_GetWindowSurface( SDL_Surface *Window ) {
+MultiSpacc_Surface *MultiSpacc_GetWindowSurface( MultiSpacc_Window *Window ) {
 	return Window;
 }
 
-void MultiSpacc_SetAppTitle( SDL_Surface *Window, const char *Title ) {
+void MultiSpacc_SetAppTitle( MultiSpacc_Window *Window, const char *Title ) {
 	SDL_WM_SetCaption( Title, NULL );
 }
-void MultiSpacc_SetAppIcon( SDL_Surface *Window, SDL_Surface *Icon ) {
+void MultiSpacc_SetAppIcon( MultiSpacc_Window *Window, MultiSpacc_Surface *Icon ) {
 	SDL_WM_SetIcon( Icon, NULL );
 }
 
-int MultiSpacc_SetColorKey( SDL_Surface *Surface, bool Flag, Uint32 Key ) {
+int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key ) {
 	if ( Flag ) {
 		return SDL_SetColorKey( Surface, SDL_SRCCOLORKEY, Key );
 	}
