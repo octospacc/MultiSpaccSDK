@@ -8,9 +8,8 @@ The list of supported (or planned) backend libraries follows:
 
 - SDL 1.2 (WIP)
 - SDL 2.0 (WIP)
+- NDS
+- GBA
+- NES
 
 Example programs (and makefiles) will come soon.
-
-### Licensing
-
-I have yet to choose a license for this. I would like for the library to be usable by as many people as possible (and, for that, the Unlicense o zlib license would be the best), and possibly to also demand that credit is given to me (citing my library name), but I have yet to understand legal compatibility with all the different libraries mine is made to work on top of.

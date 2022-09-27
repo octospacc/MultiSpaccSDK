@@ -1,0 +1,14 @@
+for i = 0, i <= 100, i++ {
+	if i % 15 == 0 {
+		Sys.Console.Print("FizzBuzz")
+	}
+	elif i % 5 == 0 {
+		Sys.Console.Print("Buzz")
+	}
+	elif i % 3 == 0 {
+		Sys.Console.Print("Fizz")
+	}
+	else {
+		Sys.Console.Print(i)
+	}
+}
