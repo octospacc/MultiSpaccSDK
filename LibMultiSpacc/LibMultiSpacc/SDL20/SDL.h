@@ -11,6 +11,9 @@
 #include "SDL2/SDL_ttf.h"
 
 #define MultiSpacc_Window SDL_Window
-#define MultiSpacc_Surface SDL_Surface
-
 #define MultiSpacc_UpdateWindowSurface SDL_UpdateWindowSurface
+
+typedef struct MultiSpacc_Event {
+    Uint32 Type;
+    SDL_Keycode Key;
+} MultiSpacc_Event;
