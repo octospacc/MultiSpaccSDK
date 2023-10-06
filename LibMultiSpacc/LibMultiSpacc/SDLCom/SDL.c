@@ -31,3 +31,22 @@ MultiSpacc_Surface *MultiSpacc_LoadImage( char FilePath[], MultiSpacc_Surface *S
 	};
 	return Final;
 };
+
+void MultiSpacc_PrintString( char Text[], MultiSpacc_Surface *Surface, int ScreenWidth, int ScreenHeight, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ )
+{
+	for(int i = 0; i < strlen( Text ); i++)
+	//while(*(Text++))
+	{
+		MultiSpacc_Rect Offset = {
+			.x = (x * 8) + (8 * i),
+			.y = (y * 8),
+		};
+		MultiSpacc_Rect Clip = {
+			.x = 8 * (Text[i] % 16),
+			.y = 8 * (Text[i] / 16),
+			.w = 8,
+			.h = 8,
+		};
+		SDL_BlitSurface( Tiles, &Clip, Surface, &Offset );
+	};
+};

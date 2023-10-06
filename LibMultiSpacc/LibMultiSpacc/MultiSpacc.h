@@ -22,3 +22,5 @@ MultiSpacc_Surface *MultiSpacc_LoadImage( char FilePath[], MultiSpacc_Surface *S
 int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key );
 
 int MultiSpacc_PollEvent( MultiSpacc_Event *Event );
+
+void MultiSpacc_PrintString( char Text[], MultiSpacc_Surface *Surface, int ScreenWidth, int ScreenHeight, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ ); // WIP
