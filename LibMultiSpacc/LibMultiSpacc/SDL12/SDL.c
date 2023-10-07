@@ -5,8 +5,8 @@
 #include "SDL/SDL_ttf.h"
 #include "../SDLCom/SDL.h"
 
-MultiSpacc_Window *MultiSpacc_SetWindow( int Width, int Height, int Bits, Uint32 Flags ) {
-	return SDL_SetVideoMode( Width, Height, Bits, Flags );
+MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig WindowConfig ) {
+	return SDL_SetVideoMode( WindowConfig.Width, WindowConfig.Height, WindowConfig.Bits, WindowConfig.Flags );
 }
 MultiSpacc_Surface *MultiSpacc_GetWindowSurface( MultiSpacc_Window *Window ) {
 	return Window;
@@ -24,4 +24,4 @@ int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key )
 		return SDL_SetColorKey( Surface, SDL_SRCCOLORKEY, Key );
 	else
 		return SDL_SetColorKey( Surface, 0, Key );
-};
+}
