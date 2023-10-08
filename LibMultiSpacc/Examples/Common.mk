@@ -30,31 +30,57 @@ ifeq ($(MultiSpacc_Target), SDL12)
 	CFlags += $(shell sdl-config --cflags)
 	LdFlags += $(shell sdl-config --libs) -lSDL -lSDL_image -lSDL_mixer -lSDL_ttf
 	Sources += $(wildcard ../../LibMultiSpacc/SDLCom/*.c ../../LibMultiSpacc/SDL12/*.c)
+	BuildProcess = Normal
 else ifeq ($(MultiSpacc_Target), SDL20)
 	Defines += -DMultiSpacc_Target_SDL20
 	CFlags += $(shell sdl2-config --cflags)
 	LdFlags += $(shell sdl2-config --libs) -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
 	Sources += $(wildcard ../../LibMultiSpacc/SDLCom/*.c ../../LibMultiSpacc/SDL20/*.c)
+	BuildProcess = Normal
 else ifeq ($(MultiSpacc_Target), NDS)
-	#include $(DEVKITARM)/ds_rules
 	Defines += -DMultiSpacc_Target_NDS
-	CFlags += -I$(DEVKITPRO)/libnds/include -DARM9
-	Sources += $(wildcard ../../LibMultiSpacc/NDS/*.c)
-	ToolsPrefix = $(DEVKITARM)/bin/arm-none-eabi-
+	BuildProcess = NDS
 endif
 
 CC = $(ToolsPrefix)gcc $(CFlags) $(Defines)
 Objects = $(Sources:.c=.o)
 
-All all: $(AppName)
+All all: $(BuildProcess)
 
-$(AppName): $(Objects)
+Normal: $(Objects)
 	$(CC) $^ $(LdFlags) -o $(AppName)$(ExeSuffix)
+
+NDS:
+	#mkdir -p ./Build/NDS/Examples
+	#cp -rT . ./Build/NDS/Examples/$(shell basename $(CURDIR)) || true
+	#rm -rf ./Build/NDS/Examples/$(shell basename $(CURDIR))/Build
+	#cp -rT ../../LibMultiSpacc ./Build/NDS/LibMultiSpacc
+	#cp ../NDS.mk ./Build/NDS/Examples/$(shell basename $(CURDIR))/Makefile
+	#ln -s $(wildcard ../../LibMultiSpacc/*.* ../../LibMultiSpacc/NDS/*.*) ./Build/NDS/Examples/$(shell basename $(CURDIR))/
+	#cd ./Build/NDS/Examples/$(shell basename $(CURDIR)); make
+	#$(eval VirtualBuildDir = ./Build/NDS/$(shell basename $(CURDIR)))
+	#mkdir -p $(VirtualBuildDir)/source/LibMultiSpacc
+	$(eval VirtualBuildDir = ./Build/NDS)
+	mkdir -p $(VirtualBuildDir)/source/.tmp
+	cp ../NDS.mk $(VirtualBuildDir)/Makefile
+	#cp $(wildcard *) $(VirtualBuildDir)/source/
+	#cp $(Sources) $(wildcard ../../LibMultiSpacc/*.* ../../LibMultiSpacc/NDS/*.*) $(VirtualBuildDir)/source/
+	cp $(Sources) $(VirtualBuildDir)/source/
+	cp $(wildcard ../../LibMultiSpacc/*.*) $(VirtualBuildDir)/source/.tmp/
+	cd $(VirtualBuildDir)/source/.tmp; for i in *; do mv $$i ../LibMultiSpacc_$$i; done
+	cp $(wildcard ../../LibMultiSpacc/NDS/*.*) $(VirtualBuildDir)/source/.tmp/
+	cd $(VirtualBuildDir)/source/.tmp; for i in *; do mv $$i ../LibMultiSpacc_NDS_$$i; done
+	#cp -rT ../../LibMultiSpacc $(VirtualBuildDir)/source/LibMultiSpacc
+	for i in $(VirtualBuildDir)/source/*; do sed -i 's|"../../LibMultiSpacc/|"LibMultiSpacc_|g' $$i; done
+	for i in $(VirtualBuildDir)/source/*; do sed -i 's|"../MultiSpacc|"LibMultiSpacc_MultiSpacc|g' $$i; done
+	for i in $(VirtualBuildDir)/source/*; do sed -i 's|"NDS/|"LibMultiSpacc_NDS_|g' $$i; done
+	cd $(VirtualBuildDir); make
 
 Run run: All
 	./$(AppName)$(ExeSuffix)
 
-Clean clean:
+Clean clean Clear clear:
 	find -L . -name "*.o" -type f -delete
 	find -L ../../LibMultiSpacc -name "*.o" -type f -delete
-	rm -f $(AppName)$(ExeSuffix) $(AppName).*$(ExeSuffix)
+	rm -f ./$(AppName)$(ExeSuffix) ./$(AppName).*$(ExeSuffix)
+	rm -rf ./Build

@@ -18,9 +18,9 @@ int main( int argc, char *args[] )
 
 	// Bitmap font borrowed from: <https://github.com/nesdoug/01_Hello/blob/master/Alpha.chr>
 	// Copyright (c) 2018 Doug Fraker www.nesdoug.com (MIT)
-	MultiSpacc_Surface *TilesImg = MultiSpacc_LoadImage( "Tiles.png", Screen, NULL );
+	//MultiSpacc_Surface *TilesImg = MultiSpacc_LoadImage( "Tiles.png", Screen, NULL );
 
-	MultiSpacc_PrintText( "Hello, World!", Screen, WindowConfig.Width, WindowConfig.Height, 4, 4, TilesImg );
+	//MultiSpacc_PrintText( "Hello, World!", Screen, WindowConfig.Width, WindowConfig.Height, 4, 4, TilesImg );
 
 	if( MultiSpacc_UpdateWindowSurface( Window ) != 0 )
 	{
