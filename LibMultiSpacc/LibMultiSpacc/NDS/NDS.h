@@ -8,8 +8,8 @@
 #include <nds.h>
 
 #define Uint32 int32
-#define MultiSpacc_Window PrintConsole
 #define MultiSpacc_Surface PrintConsole
+#define MultiSpacc_Window PrintConsole
 #define MultiSpacc_Sleep {}
 
 typedef struct MultiSpacc_Event {

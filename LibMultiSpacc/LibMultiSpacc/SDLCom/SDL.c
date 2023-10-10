@@ -32,7 +32,7 @@ MultiSpacc_Surface *MultiSpacc_LoadImage( char FilePath[], MultiSpacc_Surface *S
 	return Final;
 }
 
-void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, int ScreenWidth, int ScreenHeight, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ )
+void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig WindowConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ )
 {
 	for( int i = 0; i < strlen( Text ); i++ )
 	{

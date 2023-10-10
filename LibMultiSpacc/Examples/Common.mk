@@ -51,29 +51,17 @@ Normal: $(Objects)
 	$(CC) $^ $(LdFlags) -o $(AppName)$(ExeSuffix)
 
 NDS:
-	#mkdir -p ./Build/NDS/Examples
-	#cp -rT . ./Build/NDS/Examples/$(shell basename $(CURDIR)) || true
-	#rm -rf ./Build/NDS/Examples/$(shell basename $(CURDIR))/Build
-	#cp -rT ../../LibMultiSpacc ./Build/NDS/LibMultiSpacc
-	#cp ../NDS.mk ./Build/NDS/Examples/$(shell basename $(CURDIR))/Makefile
-	#ln -s $(wildcard ../../LibMultiSpacc/*.* ../../LibMultiSpacc/NDS/*.*) ./Build/NDS/Examples/$(shell basename $(CURDIR))/
-	#cd ./Build/NDS/Examples/$(shell basename $(CURDIR)); make
-	#$(eval VirtualBuildDir = ./Build/NDS/$(shell basename $(CURDIR)))
-	#mkdir -p $(VirtualBuildDir)/source/LibMultiSpacc
 	$(eval VirtualBuildDir = ./Build/NDS)
 	mkdir -p $(VirtualBuildDir)/source/.tmp
 	cp ../NDS.mk $(VirtualBuildDir)/Makefile
-	#cp $(wildcard *) $(VirtualBuildDir)/source/
-	#cp $(Sources) $(wildcard ../../LibMultiSpacc/*.* ../../LibMultiSpacc/NDS/*.*) $(VirtualBuildDir)/source/
 	cp $(Sources) $(VirtualBuildDir)/source/
 	cp $(wildcard ../../LibMultiSpacc/*.*) $(VirtualBuildDir)/source/.tmp/
 	cd $(VirtualBuildDir)/source/.tmp; for i in *; do mv $$i ../LibMultiSpacc_$$i; done
 	cp $(wildcard ../../LibMultiSpacc/NDS/*.*) $(VirtualBuildDir)/source/.tmp/
 	cd $(VirtualBuildDir)/source/.tmp; for i in *; do mv $$i ../LibMultiSpacc_NDS_$$i; done
-	#cp -rT ../../LibMultiSpacc $(VirtualBuildDir)/source/LibMultiSpacc
-	for i in $(VirtualBuildDir)/source/*; do sed -i 's|"../../LibMultiSpacc/|"LibMultiSpacc_|g' $$i; done
-	for i in $(VirtualBuildDir)/source/*; do sed -i 's|"../MultiSpacc|"LibMultiSpacc_MultiSpacc|g' $$i; done
-	for i in $(VirtualBuildDir)/source/*; do sed -i 's|"NDS/|"LibMultiSpacc_NDS_|g' $$i; done
+	for i in $(VirtualBuildDir)/source/*; do sed -i 's|#include[ \t]"../../LibMultiSpacc/|#include "LibMultiSpacc_|g' $$i; done
+	for i in $(VirtualBuildDir)/source/*; do sed -i 's|#include[ \t]"../MultiSpacc|#include "LibMultiSpacc_MultiSpacc|g' $$i; done
+	for i in $(VirtualBuildDir)/source/*; do sed -i 's|#include[ \t]"NDS/|#include "LibMultiSpacc_NDS_|g' $$i; done
 	cd $(VirtualBuildDir); make
 
 Run run: All

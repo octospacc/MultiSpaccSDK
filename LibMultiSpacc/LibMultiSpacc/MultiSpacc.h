@@ -25,7 +25,7 @@ typedef struct MultiSpacc_SurfaceConfig {
 	Uint32 Flags;
 } MultiSpacc_SurfaceConfig;
 
-MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig WindowConfig );
+MultiSpacc_Window MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig WindowConfig );
 MultiSpacc_Surface *MultiSpacc_GetWindowSurface( MultiSpacc_Window *Window );
 
 void MultiSpacc_SetAppTitle( MultiSpacc_Window *Window, const char Title[] );
@@ -36,4 +36,4 @@ int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key )
 
 int MultiSpacc_PollEvent( MultiSpacc_Event *Event );
 
-void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, int ScreenWidth, int ScreenHeight, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ ); // WIP
+void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig WindowConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ ); // WIP
