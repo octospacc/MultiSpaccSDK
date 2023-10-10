@@ -5,8 +5,8 @@
 #include "SDL/SDL_ttf.h"
 #include "../SDLCom/SDL.h"
 
-MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig WindowConfig ) {
-	return SDL_SetVideoMode( WindowConfig.Width, WindowConfig.Height, WindowConfig.Bits, WindowConfig.Flags );
+MultiSpacc_Window MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig WindowConfig ) {
+	return *SDL_SetVideoMode( WindowConfig.Width, WindowConfig.Height, WindowConfig.Bits, WindowConfig.Flags );
 }
 MultiSpacc_Surface *MultiSpacc_GetWindowSurface( MultiSpacc_Window *Window ) {
 	return Window;

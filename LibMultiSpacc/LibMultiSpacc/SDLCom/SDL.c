@@ -49,3 +49,11 @@ void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_
 		SDL_BlitSurface( Tiles, &Clip, Surface, &Offset );
 	};
 }
+
+void MultiSpacc_PrintDebug( const char *format, ... )
+{
+	va_list args;
+	va_start(args, format);
+	fprintf(stderr, format, args);
+	va_end(args);
+}
