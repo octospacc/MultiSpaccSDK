@@ -6,17 +6,49 @@
 #include <stdio.h>
 
 #ifdef MultiSpacc_Target_SDL12
-	#include "SDL12/SDL.h"
-	#include "SDLCom/SDL.h"
+	#include <SDL/SDL.h>
+	#include <SDL/SDL_image.h>
+	#include <SDL/SDL_mixer.h>
+	#include <SDL/SDL_ttf.h>
+	#define MultiSpacc_Window SDL_Surface
+	#define MultiSpacc_UpdateWindowSurface SDL_Flip
+	typedef struct MultiSpacc_Event {
+		Uint32 Type;
+		SDLKey Key;
+	} MultiSpacc_Event;
 #endif
 
 #ifdef MultiSpacc_Target_SDL20
-	#include "SDL20/SDL.h"
-	#include "SDLCom/SDL.h"
+	#include <SDL2/SDL.h>
+	#include <SDL2/SDL_image.h>
+	#include <SDL2/SDL_mixer.h>
+	#include <SDL2/SDL_ttf.h>
+	#define MultiSpacc_Window SDL_Window
+	#define MultiSpacc_UpdateWindowSurface SDL_UpdateWindowSurface
+	typedef struct MultiSpacc_Event {
+		Uint32 Type;
+		SDL_Keycode Key;
+	} MultiSpacc_Event;
+#endif
+
+#ifdef MultiSpacc_Target_SDLCom
+	#define MultiSpacc_Init SDL_Init
+	#define MultiSpacc_Surface SDL_Surface
+	#define MultiSpacc_GetTicks SDL_GetTicks
+	#define MultiSpacc_Sleep SDL_Delay
+	#define MultiSpacc_Rect SDL_Rect
 #endif
 
 #ifdef MultiSpacc_Target_NDS
-	#include "NDS/NDS.h"
+	#include <nds.h>
+	#define Uint32 int32
+	#define MultiSpacc_Surface PrintConsole
+	#define MultiSpacc_Window PrintConsole
+	typedef struct MultiSpacc_Event {
+		int Keys;
+	} MultiSpacc_Event;
+	int MultiSpacc_UpdateWindowSurface( MultiSpacc_Window *Window );
+	void MultiSpacc_Sleep( int milliseconds );
 #endif
 
 typedef struct MultiSpacc_SurfaceConfig {

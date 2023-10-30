@@ -2,6 +2,7 @@ AppName = $(notdir ${CURDIR})
 Sources = $(wildcard *.c ../../LibMultiSpacc/*.c)
 CFlags = -O2 -Wpedantic -Werror
 
+# Default build is always for the host system
 ifndef Target
 	ifeq ($(shell uname --operating-system), Msys)
 		Target = WindowsPC
@@ -26,16 +27,16 @@ ifdef Target
 endif
 
 ifeq ($(MultiSpacc_Target), SDL12)
-	Defines += -DMultiSpacc_Target_SDL12
+	Defines += -DMultiSpacc_Target_SDL12 -DMultiSpacc_Target_SDLCom
 	CFlags += $(shell sdl-config --cflags)
 	LdFlags += $(shell sdl-config --libs) -lSDL -lSDL_image -lSDL_mixer -lSDL_ttf
-	Sources += $(wildcard ../../LibMultiSpacc/SDLCom/*.c ../../LibMultiSpacc/SDL12/*.c)
+	#Sources += $(wildcard ../../LibMultiSpacc/SDLCom/*.c ../../LibMultiSpacc/SDL12/*.c)
 	BuildProcess = Normal
 else ifeq ($(MultiSpacc_Target), SDL20)
-	Defines += -DMultiSpacc_Target_SDL20
+	Defines += -DMultiSpacc_Target_SDL20 -DMultiSpacc_Target_SDLCom
 	CFlags += $(shell sdl2-config --cflags)
 	LdFlags += $(shell sdl2-config --libs) -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
-	Sources += $(wildcard ../../LibMultiSpacc/SDLCom/*.c ../../LibMultiSpacc/SDL20/*.c)
+	#Sources += $(wildcard ../../LibMultiSpacc/SDLCom/*.c ../../LibMultiSpacc/SDL20/*.c)
 	BuildProcess = Normal
 else ifeq ($(MultiSpacc_Target), NDS)
 	Defines += -DMultiSpacc_Target_NDS
@@ -56,12 +57,14 @@ NDS:
 	cp ../NDS.mk $(VirtualBuildDir)/Makefile
 	cp $(Sources) $(VirtualBuildDir)/source/
 	cp $(wildcard ../../LibMultiSpacc/*.*) $(VirtualBuildDir)/source/.tmp/
-	cd $(VirtualBuildDir)/source/.tmp; for i in *; do mv $$i ../LibMultiSpacc_$$i; done
-	cp $(wildcard ../../LibMultiSpacc/NDS/*.*) $(VirtualBuildDir)/source/.tmp/
-	cd $(VirtualBuildDir)/source/.tmp; for i in *; do mv $$i ../LibMultiSpacc_NDS_$$i; done
+	# rm of the last file is temporary fix for a strange file duplication bug
+	cd $(VirtualBuildDir)/source/.tmp; for i in *; do mv $$i ../LibMultiSpacc_$$i; done; rm ../MultiSpacc.c #
+	#cp $(wildcard ../../LibMultiSpacc/NDS/*.*) $(VirtualBuildDir)/source/.tmp/
+	#cd $(VirtualBuildDir)/source/.tmp; for i in *; do mv $$i ../LibMultiSpacc_NDS_$$i; done
 	for i in $(VirtualBuildDir)/source/*; do sed -i 's|#include[ \t]"../../LibMultiSpacc/|#include "LibMultiSpacc_|g' $$i; done
 	for i in $(VirtualBuildDir)/source/*; do sed -i 's|#include[ \t]"../MultiSpacc|#include "LibMultiSpacc_MultiSpacc|g' $$i; done
 	for i in $(VirtualBuildDir)/source/*; do sed -i 's|#include[ \t]"NDS/|#include "LibMultiSpacc_NDS_|g' $$i; done
+	for i in $(VirtualBuildDir)/source/*; do sed -i 's|#include[ \t]"./|#include "./LibMultiSpacc_|g' $$i; done
 	cd $(VirtualBuildDir); make
 
 Run run: All
