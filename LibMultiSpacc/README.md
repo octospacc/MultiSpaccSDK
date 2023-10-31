@@ -7,10 +7,10 @@ The idea is simple: to build an universal abstraction layer on top of other exis
 The list of supported (or planned) backend libraries follows:
 
 - SDL 1.2 (WIP)
-- SDL 2.0/3.0 (WIP)[^1]
+- SDL 2.0/3.0 (WIP/?)[^1]
 - NDS (WIP)
 - GBA (Planned)
-- NES (Planned)
+- NES (WIP)
 
 SDL is used as the main cross-platform library (covering many old systems with v1.2, and all modern PC, embedded, and virtualized systems with v2.0).
 Specific platform that require special code are handled separately via other base abstraction layers.

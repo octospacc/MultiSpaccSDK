@@ -51,6 +51,11 @@
 	void MultiSpacc_Sleep( int milliseconds );
 #endif
 
+#ifdef MultiSpacc_Target_NES
+	#include <nes.h>
+	#include "neslib.h"
+#endif
+
 typedef struct MultiSpacc_SurfaceConfig {
 	int Width;
 	int Height;
@@ -71,3 +76,5 @@ int MultiSpacc_PollEvent( MultiSpacc_Event *Event );
 
 void MultiSpacc_PrintDebug( const char *format, ... );
 void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig WindowConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ ); // WIP
+
+void MultiSpacc_Sprite( int id, int x, int y, int sprite, MultiSpacc_Surface *Tiles, MultiSpacc_Surface *Surface );
