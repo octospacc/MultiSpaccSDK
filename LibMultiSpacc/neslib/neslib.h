@@ -300,8 +300,12 @@ void __fastcall__ nmi_set_callback(void (*callback)(void));
 #ifndef NULL
 	#define NULL 0
 #endif
-#define TRUE			1
-#define FALSE			0
+#ifndef TRUE
+	#define TRUE 1
+#endif
+#ifndef FALSE
+	#define FALSE 0
+#endif
 
 #define NT_UPD_HORZ		0x40
 #define NT_UPD_VERT		0x80

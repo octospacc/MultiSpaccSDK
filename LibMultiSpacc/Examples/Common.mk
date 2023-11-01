@@ -51,12 +51,8 @@ else ifeq ($(MultiSpacc_Target), NES)
 endif
 
 CC = $(ToolsPrefix)gcc $(CFlags) $(Defines)
-Shell = $(shell echo $$SHELL)
-AppObjects = $(AppSources:.c=.o)
-SpaccObjects = $(SpaccSources:.c=.o)
-BuildObjects = $(AppObjects) $(SpaccObjects)
-#BuildSources = $(AppSources) $(SpaccSources)
-#Objects = $(BuildSources:.c=.o)
+BuildSources = $(AppSources) $(SpaccSources)
+BuildObjects = $(BuildSources:.c=.o)
 
 All all: $(BuildProcess)
 
@@ -73,9 +69,9 @@ __NDS__:
 	cp $(SpaccSources) $(SpaccHeaders) $(VirtualBuildDir)/source/.tmp/
 	cd $(VirtualBuildDir)/source/.tmp; for i in *; do mv ./$$i ../LibMultiSpacc_$$i; done
 	cp $(AppSources) $(AppHeaders) $(VirtualBuildDir)/source/
-	for i in $(VirtualBuildDir)/source/*; do sed -i 's|#include[ \t]"../../LibMultiSpacc/|#include "LibMultiSpacc_|g' $$i; done
-	for i in $(VirtualBuildDir)/source/*; do sed -i 's|#include[ \t]"../MultiSpacc|#include "LibMultiSpacc_MultiSpacc|g' $$i; done
-	for i in $(VirtualBuildDir)/source/*; do sed -i 's|#include[ \t]"./|#include "./LibMultiSpacc_|g' $$i; done
+	for i in $(VirtualBuildDir)/source/*.c $(VirtualBuildDir)/source/*.h; do sed -i 's|#include[ \t]"../../LibMultiSpacc/|#include "LibMultiSpacc_|g' $$i; done
+	for i in $(VirtualBuildDir)/source/*.c $(VirtualBuildDir)/source/*.h; do sed -i 's|#include[ \t]"../MultiSpacc|#include "LibMultiSpacc_MultiSpacc|g' $$i; done
+	for i in $(VirtualBuildDir)/source/*.c $(VirtualBuildDir)/source/*.h; do sed -i 's|#include[ \t]"./|#include "LibMultiSpacc_|g' $$i; done
 	cd $(VirtualBuildDir); make
 
 __NES__:
@@ -85,13 +81,14 @@ __NES__:
 	cp $(SpaccSources) $(SpaccHeaders) $(VirtualBuildDir)/.tmp/
 	cd $(VirtualBuildDir)/.tmp; for i in *; do mv ./$$i ../LibMultiSpacc_$$i; done
 	cp $(AppSources) $(AppHeaders) $(VirtualBuildDir)/
-	for i in $(VirtualBuildDir)/*; do sed -i 's|#include[ \t]"../../LibMultiSpacc/|#include "LibMultiSpacc_|g' $$i; done
-	for i in $(VirtualBuildDir)/*; do sed -i 's|#include[ \t]"../MultiSpacc|#include "LibMultiSpacc_MultiSpacc|g' $$i; done
-	for i in $(VirtualBuildDir)/*; do sed -i 's|#include[ \t]"./|#include "./LibMultiSpacc_|g' $$i; done
-	cp ../../neslib/*.cfg ../../neslib/crt0.o ../../neslib/chr_generic.o ../../neslib/*.lib ../../neslib/*.h  $(VirtualBuildDir)/
-	echo "AppName='$(AppName)'; Defines='$(Defines)'; AppSources='$(AppSources)'; SpaccSources='$(SpaccSources)'; AppObjects='$(AppObjects)'; BuildObjects='$(BuildObjects)';" > $(VirtualBuildDir)/Make.sh
+	for i in $(VirtualBuildDir)/*.c $(VirtualBuildDir)/*.h; do sed -i 's|#include[ \t]"../../LibMultiSpacc/|#include "LibMultiSpacc_|g' $$i; done
+	for i in $(VirtualBuildDir)/*.c $(VirtualBuildDir)/*.h; do sed -i 's|#include[ \t]"../MultiSpacc|#include "LibMultiSpacc_MultiSpacc|g' $$i; done
+	for i in $(VirtualBuildDir)/*.c $(VirtualBuildDir)/*.h; do sed -i 's|#include[ \t]"./|#include "LibMultiSpacc_|g' $$i; done
+	cp ../../neslib/*.cfg ../../neslib/crt0.o ../../neslib/*.lib ../../neslib/*.h $(VirtualBuildDir)/
+	printf ".segment \"CHARS\"\n\t.incbin \"CHARS.chr\"" > $(VirtualBuildDir)/CHARS.s
+	echo "AppName='$(AppName)'; Defines='$(Defines)'; ProjectRoot=../..;" > $(VirtualBuildDir)/Make.sh
 	cat ../NES.mk.sh >> $(VirtualBuildDir)/Make.sh
-	cd $(VirtualBuildDir); $(Shell) ./Make.sh
+	cd $(VirtualBuildDir); sh ./Make.sh
 
 Run run: All
 	./$(AppName)$(ExeSuffix)

@@ -22,6 +22,8 @@ MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig *WindowConfig 
 	#endif
 
 	#ifdef MultiSpacc_Target_NES
+		WindowConfig->Width = 256;
+		WindowConfig->Height = 240;
 		oam_clear();
 		pal_all(WindowConfig->Palette);
 		ppu_on_all();

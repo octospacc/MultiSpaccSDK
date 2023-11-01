@@ -27,7 +27,7 @@ int main( int argc, char *argv[] )
 	MultiSpacc_Surface *Screen;
 	MultiSpacc_Surface *TilesImg;
 
-	WindowConfig.Width = 256;
+	WindowConfig.Width = 320;
 	WindowConfig.Height = 240;
 	WindowConfig.Bits = 16;
 	memcpy( WindowConfig.Palette, PALETTE, 32 );
@@ -45,13 +45,13 @@ int main( int argc, char *argv[] )
 
 	// Bitmap font borrowed from: <https://github.com/nesdoug/01_Hello/blob/master/Alpha.chr>
 	// Copyright (c) 2018 Doug Fraker www.nesdoug.com (MIT)
-	//TilesImg = MultiSpacc_LoadImage( "Tiles.png", Screen, NULL );
+	TilesImg = MultiSpacc_LoadImage( "CHARS.png", Screen, NULL );
 	MultiSpacc_PrintText( "Hello, World!", Screen, &WindowConfig, 2, 2, TilesImg );
 	MultiSpacc_PrintDebug("[I] Ready!\n");
 
 	while(true)
 	{
-		MultiSpacc_Sprite( 0, spriteX, spriteY, 20/*128*/, TilesImg, Screen );
+		MultiSpacc_Sprite( 0, spriteX, spriteY, 1, TilesImg, Screen );
 		//scroll(spriteX,0);
 
 		spriteX += accelX;
@@ -74,7 +74,7 @@ int main( int argc, char *argv[] )
 		};
 		
 		// TODO: Implement cross-platform vblank-wait
-		//MultiSpacc_Sleep(16);
+		MultiSpacc_Sleep(16);
 	}
 
 	return 0;

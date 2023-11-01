@@ -98,4 +98,11 @@ void MultiSpacc_Sprite( int id, int x, int y, int sprite, MultiSpacc_Surface *Ti
 		ppu_wait_frame();
 		return 0;
 	}
+
+	void MultiSpacc_Sleep( int milliseconds ){}
+
+	MultiSpacc_Surface *MultiSpacc_LoadImage( char FilePath[], MultiSpacc_Surface *Screen, Uint32 *ColorKey )
+	{
+		return NULL;
+	};
 #endif

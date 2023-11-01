@@ -1,7 +1,8 @@
 #!/dev/null
 set -e
+SdkRoot="${ProjectRoot}/../../.."
 
-# ${SpaccSources} ${AppSources} ${SpaccObjects} ${AppObjects} chr_generic.s chr_generic.o crt0.o
+sh "${SdkRoot}/Tools/python3.sh" "${SdkRoot}/Tools/pilbmp2nes.py" -i "${ProjectRoot}/CHARS.png" -o ./CHARS.chr
 
 for File in *.c
 do cc65 -Oirs --target nes ${File} ${Defines}

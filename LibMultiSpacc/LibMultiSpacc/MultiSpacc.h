@@ -64,6 +64,7 @@
 	#define MultiSpacc_Surface int
 	#define MultiSpacc_Event int
 	int MultiSpacc_UpdateWindowSurface( MultiSpacc_Window *Window );
+	void MultiSpacc_Sleep( int milliseconds );
 #endif
 
 typedef struct MultiSpacc_SurfaceConfig {
