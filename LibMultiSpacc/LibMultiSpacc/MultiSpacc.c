@@ -86,4 +86,16 @@ void MultiSpacc_Sprite( int id, int x, int y, int sprite, MultiSpacc_Surface *Ti
 		};
 		SDL_BlitSurface( Tiles, &Clip, Surface, &Offset );
 	#endif
+	
+	#ifdef MultiSpacc_Target_NES
+		oam_spr(x, y, sprite, 0, id);
+	#endif
 }
+
+#ifdef MultiSpacc_Target_NES
+	int MultiSpacc_UpdateWindowSurface( MultiSpacc_Window *Window )
+	{
+		ppu_wait_frame();
+		return 0;
+	}
+#endif

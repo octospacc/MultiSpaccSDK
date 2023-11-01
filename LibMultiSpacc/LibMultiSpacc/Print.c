@@ -1,6 +1,6 @@
 #include "./MultiSpacc.h"
 
-void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig WindowConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ )
+void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig *WindowConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ )
 {
 	#ifdef MultiSpacc_Target_SDLCom
 		for( int i = 0; i < strlen(Text); i++ )
@@ -21,6 +21,13 @@ void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_
 
 	#ifdef MultiSpacc_Target_NDS
 		iprintf("%s", Text);
+	#endif
+
+	#ifdef MultiSpacc_Target_NES
+		ppu_off();
+		vram_adr(NTADR_A( x, y ));
+		vram_write( Text, strlen(Text) );
+		ppu_on_all();
 	#endif
 }
 

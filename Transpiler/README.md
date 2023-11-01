@@ -1,0 +1,1 @@
+This component of the MultiSpaccSDK is abandoned until further notice.

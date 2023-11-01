@@ -1,13 +1,13 @@
 #include "./MultiSpacc.h"
 
-MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig WindowConfig )
+MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig *WindowConfig )
 {
 	#ifdef MultiSpacc_Target_SDL12
-		return SDL_SetVideoMode( WindowConfig.Width, WindowConfig.Height, WindowConfig.Bits, WindowConfig.Flags );
+		return SDL_SetVideoMode( WindowConfig->Width, WindowConfig->Height, WindowConfig->Bits, WindowConfig->Flags );
 	#endif
 
 	#ifdef MultiSpacc_Target_SDL20
-		return SDL_CreateWindow( NULL, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WindowConfig.Width, WindowConfig.Height, WindowConfig.Flags );
+		return SDL_CreateWindow( NULL, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WindowConfig->Width, WindowConfig->Height, WindowConfig->Flags );
 	#endif
 
 	#ifdef MultiSpacc_Target_NDS
@@ -19,6 +19,12 @@ MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig WindowConfig )
 		bottomScreen = consoleInit(bottomScreen, 3, BgType_Text4bpp, BgSize_T_256x256, 31, 0, false, true);
 		consoleSelect(bottomScreen);
 		return bottomScreen;
+	#endif
+
+	#ifdef MultiSpacc_Target_NES
+		oam_clear();
+		pal_all(WindowConfig->Palette);
+		ppu_on_all();
 	#endif
 }
 

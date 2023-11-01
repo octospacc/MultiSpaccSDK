@@ -1,5 +1,7 @@
 *.o
+*.lib
 *.exe
 *.run
 *.tmp
+.tmp/
 Build/
