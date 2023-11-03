@@ -1,5 +1,6 @@
 *.o
 *.lib
+*.dll
 *.exe
 *.run
 *.tmp

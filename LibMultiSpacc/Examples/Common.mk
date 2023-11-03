@@ -23,6 +23,14 @@ ifdef Target
 		ExeSuffix = .exe
 		Defines += -DTarget_WindowsPC
 		MultiSpacc_Target = SDL20
+	else ifeq ($(Target), Windows9x)
+		ExeSuffix = .exe
+		Defines += -DTarget_Windows9x
+		MultiSpacc_Target = SDL12
+		LdFlags += -lmingw32 -static-libgcc
+		ToolsSyspath=/c/Files/Sdk/mingw32/bin
+		ToolsPrefix=$(ToolsSyspath)/
+		export PATH=$$PATH:$(ToolsSyspath)
 	else ifeq ($(Target), NDS)
 		Defines += -DTarget_NDS
 		MultiSpacc_Target = NDS
@@ -35,12 +43,12 @@ endif
 ifeq ($(MultiSpacc_Target), SDL12)
 	Defines += -DMultiSpacc_Target_SDL12 -DMultiSpacc_Target_SDLCom
 	CFlags += $(shell sdl-config --cflags)
-	LdFlags += $(shell sdl-config --libs) -lSDL -lSDL_image -lSDL_mixer -lSDL_ttf
+	LdFlags += $(shell sdl-config --libs) -lSDLmain -lSDL -lSDL_image -lSDL_mixer -lSDL_ttf
 	BuildProcess = __Normal__
 else ifeq ($(MultiSpacc_Target), SDL20)
 	Defines += -DMultiSpacc_Target_SDL20 -DMultiSpacc_Target_SDLCom
 	CFlags += $(shell sdl2-config --cflags)
-	LdFlags += $(shell sdl2-config --libs) -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
+	LdFlags += $(shell sdl2-config --libs) -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
 	BuildProcess = __Normal__
 else ifeq ($(MultiSpacc_Target), NDS)
 	Defines += -DMultiSpacc_Target_NDS
@@ -56,7 +64,7 @@ BuildObjects = $(BuildSources:.c=.o)
 
 All all: $(BuildProcess)
 
-# TODO: use virtual build dirs even for normals to allow linking against different wrapped libraries
+# TODO: use virtual build dirs even for normals to allow linking against different libraries without recleaning
 __Normal__: $(BuildObjects)
 	$(CC) $^ $(LdFlags) -o $(AppName)$(ExeSuffix)
 

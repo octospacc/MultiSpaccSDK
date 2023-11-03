@@ -1,0 +1,24 @@
+image: debian:latest
+
+before_script: |
+  apt update
+  apt install \
+    make gcc cc65 python3 python3-pil \
+    libsdl1.2-dev libsdl-image1.2-dev libsdl-ttf2.0-dev libsdl-mixer1.2-dev \
+    libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-mixer-dev
+
+Tests:
+  script: |
+    cd ./LibMultiSpacc/Examples
+    for Example in */
+    do
+      cd ${Example}
+      for Build in "Target=LinuxPC MultiSpacc_Target=SDL12" "Target=LinuxPC MultiSpacc_Target=SDL20" "Target=NES"
+      do
+        make clean
+        make -j$(nproc --all) ${Build}
+      done
+      cd ..
+    done
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
