@@ -44,6 +44,10 @@
 	#define MultiSpacc_Rect SDL_Rect
 #endif
 
+#ifdef MultiSpacc_Target_Web
+	#include <emscripten.h>
+#endif
+
 #ifdef MultiSpacc_Target_NDS
 	#include <nds.h>
 	#define Uint32 int32
@@ -80,6 +84,10 @@ MultiSpacc_Surface *MultiSpacc_GetWindowSurface( MultiSpacc_Window *Window );
 
 void MultiSpacc_SetAppTitle( MultiSpacc_Window *Window, const char Title[] );
 void MultiSpacc_SetAppIcon( MultiSpacc_Window *Window, MultiSpacc_Surface *Icon );
+
+bool MultiSpacc_SetMainLoop( bool function( void *args ), void *args );
+
+bool MultiSpacc_WaitUpdateDisplay( MultiSpacc_Window *window, Uint32 *nextTick );
 
 MultiSpacc_Surface *MultiSpacc_LoadImage( char FilePath[], MultiSpacc_Surface *Screen, Uint32 *ColorKey );
 int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key );

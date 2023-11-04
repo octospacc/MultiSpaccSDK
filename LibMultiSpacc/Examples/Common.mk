@@ -5,51 +5,72 @@ SpaccSources = $(wildcard ../../LibMultiSpacc/*.c)
 SpaccHeaders = $(wildcard ../../LibMultiSpacc/*.h)
 CFlags = -Os -Werror -Wpedantic -Wdeclaration-after-statement
 
-# Default build is always for the host system
+# TODO: handle other unixes
+ifeq ($(shell uname --operating-system), Msys)
+	Host = Windows
+else
+	Host = Linux
+endif
+
+# When no user-specified target, build for the host system
 ifndef Target
-	ifeq ($(shell uname --operating-system), Msys)
+	ifeq ($(Host), Windows)
 		Target = WindowsPC
-	else
+	else ifeq ($(Host), Linux)
 		Target = LinuxPC
 	endif
 endif
 
-ifdef Target
-	ifeq ($(Target), LinuxPC)
-		ExeSuffix = .run
-		Defines += -DTarget_LinuxPC
-		MultiSpacc_Target = SDL20
-	else ifeq ($(Target), WindowsPC)
-		ExeSuffix = .exe
-		Defines += -DTarget_WindowsPC
-		MultiSpacc_Target = SDL20
-	else ifeq ($(Target), Windows9x)
-		ExeSuffix = .exe
-		Defines += -DTarget_Windows9x
-		MultiSpacc_Target = SDL12
-		LdFlags += -lmingw32 -static-libgcc
-		ToolsSyspath=/c/Files/Sdk/mingw32/bin
-		ToolsPrefix=$(ToolsSyspath)/
-		export PATH=$$PATH:$(ToolsSyspath)
-	else ifeq ($(Target), NDS)
-		Defines += -DTarget_NDS
-		MultiSpacc_Target = NDS
-	else ifeq ($(Target), NES)
-		Defines += -DTarget_NES
-		MultiSpacc_Target = NES
+# TODO: handle building for Windows targets from Linux hosts
+
+ifeq ($(Target), LinuxPC)
+	ExeSuffix = .run
+	Defines += -DTarget_LinuxPC
+	MultiSpacc_Target = SDL20
+else ifeq ($(Target), WindowsPC)
+	ExeSuffix = .exe
+	Defines += -DTarget_WindowsPC
+	MultiSpacc_Target = SDL20
+	ifneq ($(Host), Windows)
+		ToolsSuffix = -mingw-w64
 	endif
+else ifeq ($(Target), Windows9x)
+	ExeSuffix = .exe
+	Defines += -DTarget_Windows9x
+	MultiSpacc_Target = SDL12
+	LdFlags += -lmingw32 -static-libgcc
+	ifeq ($(Host), Windows)
+		ToolsSyspath = /c/Files/Sdk/mingw32/bin
+		export PATH=$$PATH:$(ToolsSyspath)
+	else
+		ToolsSyspath = /opt/Sdk/mingw32/bin
+		ToolsWrapper = wine
+	endif
+	ToolsPrefix = $(ToolsSyspath)/
+else ifeq ($(Target), Web)
+	Defines += -DTarget_Web
+	MultiSpacc_Target = Web
+else ifeq ($(Target), NDS)
+	Defines += -DTarget_NDS
+	MultiSpacc_Target = NDS
+else ifeq ($(Target), NES)
+	Defines += -DTarget_NES
+	MultiSpacc_Target = NES
 endif
 
 ifeq ($(MultiSpacc_Target), SDL12)
-	Defines += -DMultiSpacc_Target_SDL12 -DMultiSpacc_Target_SDLCom
+	Defines += -DMultiSpacc_Target_SDL12 -DMultiSpacc_Target_SDLCom -DMultiSpacc_Target_SDLStandard
 	CFlags += $(shell sdl-config --cflags)
 	LdFlags += $(shell sdl-config --libs) -lSDLmain -lSDL -lSDL_image -lSDL_mixer -lSDL_ttf
 	BuildProcess = __Normal__
 else ifeq ($(MultiSpacc_Target), SDL20)
-	Defines += -DMultiSpacc_Target_SDL20 -DMultiSpacc_Target_SDLCom
+	Defines += -DMultiSpacc_Target_SDL20 -DMultiSpacc_Target_SDLCom -DMultiSpacc_Target_SDLStandard
 	CFlags += $(shell sdl2-config --cflags)
 	LdFlags += $(shell sdl2-config --libs) -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
 	BuildProcess = __Normal__
+else ifeq ($(MultiSpacc_Target), Web)
+	Defines += -DMultiSpacc_Target_Web -DMultiSpacc_Target_SDL20 -DMultiSpacc_Target_SDLCom
+	BuildProcess = __Web__
 else ifeq ($(MultiSpacc_Target), NDS)
 	Defines += -DMultiSpacc_Target_NDS
 	BuildProcess = __NDS__
@@ -58,15 +79,23 @@ else ifeq ($(MultiSpacc_Target), NES)
 	BuildProcess = __NES__
 endif
 
-CC = $(ToolsPrefix)gcc $(CFlags) $(Defines)
 BuildSources = $(AppSources) $(SpaccSources)
 BuildObjects = $(BuildSources:.c=.o)
+
+ifeq ($(BuildProcess), __Normal__)
+	CC = $(ToolsWrapper) $(ToolsPrefix)gcc$(ToolsSuffix) $(CFlags) $(Defines)
+endif
 
 All all: $(BuildProcess)
 
 # TODO: use virtual build dirs even for normals to allow linking against different libraries without recleaning
 __Normal__: $(BuildObjects)
 	$(CC) $^ $(LdFlags) -o $(AppName)$(ExeSuffix)
+
+__Web__:
+	emcc $(BuildSources) -sWASM=1 -sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sSDL2_IMAGE_FORMATS='["png"]' -sUSE_SDL_TTF=2 -sUSE_SDL_MIXER=2 --preload-file Emscripten -o Emscripten.js
+	cp ../Emscripten.html ./$(AppName.html)
+	# TODO: bundle JS, WASM, and assets package in HTML file
 
 # TODO: Fix include substitutions properly in non-standard build processes
 

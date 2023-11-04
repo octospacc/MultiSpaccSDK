@@ -2,6 +2,17 @@
 
 #define AppName "Hello World"
 
+typedef struct MainArgs {
+	int spriteX;
+	int spriteY;
+	int accelX;
+	int accelY;
+	MultiSpacc_SurfaceConfig *WindowConfig;
+	MultiSpacc_Window *Window;
+	MultiSpacc_Surface *Screen;
+	MultiSpacc_Surface *TilesImg;
+} MainArgs;
+
 /*{pal:"nes",layout:"nes"}*/
 const char PALETTE[32] = { 
 	0x03,                // screen
@@ -15,67 +26,72 @@ const char PALETTE[32] = {
 	0x0d,0x27,0x2a,      // sprite 3
 };
 
+Uint32 nextTick;
+
+bool MainLoop( void *args )
+{
+	MainArgs *margs = (MainArgs*)args;
+
+	MultiSpacc_Sprite( 0, margs->spriteX, margs->spriteY, 1, margs->TilesImg, margs->Screen );
+	//scroll(spriteX,0);
+
+	margs->spriteX += margs->accelX;
+	margs->spriteY += margs->accelY;
+
+	if( margs->spriteX >= margs->WindowConfig->Width )
+	{
+		margs->spriteX = 0;
+	}
+
+	if( margs->spriteY == 0 || margs->spriteY == ( margs->WindowConfig->Height - 8 ) )
+	{
+		margs->accelY *= -1;
+	}
+
+	// check keys
+	// if ESC pressed exit
+	// ...
+
+	if( !MultiSpacc_WaitUpdateDisplay( margs->Window, &nextTick ) )
+	{
+		MultiSpacc_PrintDebug("[E] Error Updating Screen.\n");
+		return false;
+	};
+
+	return true;
+}
+
 int main( int argc, char *argv[] )
 {
-	int spriteX = 0;
-	int spriteY = 0;
-	int accelX = +1;
-	int accelY = +2;
-
+	MainArgs margs = {0};
 	MultiSpacc_SurfaceConfig WindowConfig = {0};
-	MultiSpacc_Window *Window;
-	MultiSpacc_Surface *Screen;
-	MultiSpacc_Surface *TilesImg;
+
+	margs.WindowConfig = &WindowConfig;
+	margs.accelX = +1;
+	margs.accelY = +2;
 
 	WindowConfig.Width = 320;
 	WindowConfig.Height = 240;
 	WindowConfig.Bits = 16;
 	memcpy( WindowConfig.Palette, PALETTE, 32 );
 	//WindowConfig.Frequency = 50;
-	Window = MultiSpacc_SetWindow( &WindowConfig /*, &PALETTE*/ );
-	Screen = MultiSpacc_GetWindowSurface( Window );
 
-	if( Screen == NULL )
+	margs.Window = MultiSpacc_SetWindow( &WindowConfig );
+	margs.Screen = MultiSpacc_GetWindowSurface( margs.Window );
+
+	if( margs.Screen == NULL )
 	{
 		MultiSpacc_PrintDebug("[E] Error Initializing Video System.\n");
 		return -1;
 	};
 
-	MultiSpacc_SetAppTitle( Window, AppName );
+	MultiSpacc_SetAppTitle( margs.Window, AppName );
+	MultiSpacc_PrintDebug("[I] Ready!\n");
 
 	// Bitmap font borrowed from: <https://github.com/nesdoug/01_Hello/blob/master/Alpha.chr>
 	// Copyright (c) 2018 Doug Fraker www.nesdoug.com (MIT)
-	TilesImg = MultiSpacc_LoadImage( "CHARS.png", Screen, NULL );
-	MultiSpacc_PrintText( "Hello, World!", Screen, &WindowConfig, 2, 2, TilesImg );
-	MultiSpacc_PrintDebug("[I] Ready!\n");
+	margs.TilesImg = MultiSpacc_LoadImage( "CHARS.png", margs.Screen, NULL );
+	MultiSpacc_PrintText( "Hello, World!", margs.Screen, &WindowConfig, 2, 2, margs.TilesImg );
 
-	while(true)
-	{
-		MultiSpacc_Sprite( 0, spriteX, spriteY, 1, TilesImg, Screen );
-		//scroll(spriteX,0);
-
-		spriteX += accelX;
-		spriteY += accelY;
-
-		if( spriteX >= WindowConfig.Width )
-		{
-			spriteX = 0;
-		}
-	
-		if( spriteY == 0 || spriteY == (WindowConfig.Height - 8) )
-		{
-			accelY *= -1;
-		}
-	
-		if( MultiSpacc_UpdateWindowSurface(Window) != 0 )
-		{
-			MultiSpacc_PrintDebug("[E] Error Updating Screen.\n");
-			return -1;
-		};
-		
-		// TODO: Implement cross-platform vblank-wait
-		MultiSpacc_Sleep(16);
-	}
-
-	return 0;
+	return MultiSpacc_SetMainLoop( MainLoop, &margs );
 }
