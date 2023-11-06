@@ -1,5 +1,5 @@
-#ifndef _MultiSpacc_h_
-#define _MultiSpacc_h_
+#ifndef _MultiSpacc_MultiSpacc_h_
+#define _MultiSpacc_MultiSpacc_h_
 
 #include <stdarg.h>
 #ifndef MultiSpacc_Target_NES
@@ -40,8 +40,6 @@
 	#define MultiSpacc_Init SDL_Init
 	#define MultiSpacc_Surface SDL_Surface
 	#define MultiSpacc_GetTicks SDL_GetTicks
-	#define MultiSpacc_Sleep SDL_Delay
-	#define MultiSpacc_Rect SDL_Rect
 #endif
 
 #ifdef MultiSpacc_Target_Web
@@ -56,19 +54,33 @@
 	typedef struct MultiSpacc_Event {
 		int Keys;
 	} MultiSpacc_Event;
-	int MultiSpacc_UpdateWindowSurface( MultiSpacc_Window *Window );
-	void MultiSpacc_Sleep( int milliseconds );
 #endif
 
 #ifdef MultiSpacc_Target_NES
 	#include <nes.h>
 	#include "neslib.h"
 	#define Uint32 int
-	#define MultiSpacc_Window int
-	#define MultiSpacc_Surface int
-	#define MultiSpacc_Event int
-	int MultiSpacc_UpdateWindowSurface( MultiSpacc_Window *Window );
+	#define MultiSpacc_Window char
+	#define MultiSpacc_Surface char
+	#define MultiSpacc_Event char
+#endif
+
+#ifdef MultiSpacc_Target_SDLCom
+	#define MultiSpacc_Sleep SDL_Delay
+#else
 	void MultiSpacc_Sleep( int milliseconds );
+#endif
+
+#ifdef MultiSpacc_Target_SDLCom
+	#define MultiSpacc_Point SDL_Point
+	#define MultiSpacc_Rect SDL_Rect
+#else
+	typedef struct MultiSpacc_Point {
+		int x, y;
+	} MultiSpacc_Point;
+	typedef struct MultiSpacc_Rect {
+		int x, y, w, h;
+	} MultiSpacc_Rect;
 #endif
 
 typedef struct MultiSpacc_SurfaceConfig {
@@ -99,4 +111,6 @@ void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_
 
 void MultiSpacc_Sprite( int id, int x, int y, int sprite, MultiSpacc_Surface *Tiles, MultiSpacc_Surface *Surface );
 
-#endif // _MultiSpacc_h_
+#include "./Keys.h"
+
+#endif // _MultiSpacc_MultiSpacc_h_

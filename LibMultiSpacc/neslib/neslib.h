@@ -36,10 +36,10 @@
 
 
 // define basic types for convenience
-typedef unsigned char byte;	// 8-bit unsigned
-typedef signed char sbyte;	// 8-bit signed
-typedef unsigned short word;	// 16-bit signed
-typedef enum { false, true } bool;	// boolean
+typedef unsigned char byte;        // 8-bit unsigned
+typedef signed char sbyte;         // 8-bit signed
+typedef unsigned short word;       // 16-bit signed
+typedef enum { false, true } bool; // boolean
 
 
 // set bg and spr palettes, data is 32 bytes array
@@ -283,14 +283,14 @@ void __fastcall__ nmi_set_callback(void (*callback)(void));
 #define MAX(x1,x2)		((x1)<(x2)?(x2):(x1))
 #define MIN(x1,x2)		((x1)<(x2)?(x1):(x2))
 
-#define MASK_SPR		0x10
-#define MASK_BG			0x08
-#define MASK_EDGE_SPR		0x04
-#define MASK_EDGE_BG		0x02
-#define MASK_TINT_RED		0x20
-#define MASK_TINT_BLUE		0x40
-#define MASK_TINT_GREEN		0x80
-#define MASK_MONO		0x01
+#define MASK_SPR        0x10
+#define MASK_BG         0x08
+#define MASK_EDGE_SPR   0x04
+#define MASK_EDGE_BG    0x02
+#define MASK_TINT_RED   0x20
+#define MASK_TINT_BLUE  0x40
+#define MASK_TINT_GREEN 0x80
+#define MASK_MONO       0x01
 
 #define NAMETABLE_A		0x2000
 #define NAMETABLE_B		0x2400
@@ -326,10 +326,10 @@ void __fastcall__ nmi_set_callback(void (*callback)(void));
 // OAM buffer @ $200-$2FF
 
 typedef struct OAMSprite {
-  byte y;	// Y coordinate
-  byte name;	// tile index in name table
-  byte attr;	// attribute flags
-  byte x;	// X coordinate
+	byte y;    // Y coordinate
+	byte name; // tile index in name table
+	byte attr; // attribute flags
+	byte x;    // X coordinate
 } OAMSprite;
 
 #define OAMBUF			((OAMSprite*) 0x200)
@@ -340,4 +340,3 @@ extern byte oam_off;
 #pragma zpsym ("oam_off")
 
 #endif /* neslib.h */
-

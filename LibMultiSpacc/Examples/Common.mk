@@ -1,4 +1,5 @@
-AppName = $(notdir ${CURDIR})
+AppName = $(notdir $(CURDIR))
+AppAssets = CHARS.png
 AppSources = $(wildcard *.c)
 AppHeaders = $(wildcard *.h)
 SpaccSources = $(wildcard ../../LibMultiSpacc/*.c)
@@ -20,8 +21,6 @@ ifndef Target
 		Target = LinuxPC
 	endif
 endif
-
-# TODO: handle building for Windows targets from Linux hosts
 
 ifeq ($(Target), LinuxPC)
 	ExeSuffix = .run
@@ -45,6 +44,7 @@ else ifeq ($(Target), Windows9x)
 	else
 		ToolsSyspath = /opt/Sdk/mingw32/bin
 		ToolsWrapper = wine
+		LdFlags += -LZ:/opt/Sdk/mingw32/lib
 	endif
 	ToolsPrefix = $(ToolsSyspath)/
 else ifeq ($(Target), Web)
@@ -70,6 +70,7 @@ else ifeq ($(MultiSpacc_Target), SDL20)
 	BuildProcess = __Normal__
 else ifeq ($(MultiSpacc_Target), Web)
 	Defines += -DMultiSpacc_Target_Web -DMultiSpacc_Target_SDL20 -DMultiSpacc_Target_SDLCom
+	LdFlags += -sWASM=1 -sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sSDL2_IMAGE_FORMATS='["png"]' -sUSE_SDL_TTF=2 -sUSE_SDL_MIXER=2
 	BuildProcess = __Web__
 else ifeq ($(MultiSpacc_Target), NDS)
 	Defines += -DMultiSpacc_Target_NDS
@@ -93,8 +94,9 @@ __Normal__: $(BuildObjects)
 	$(CC) $^ $(LdFlags) -o $(AppName)$(ExeSuffix)
 
 __Web__:
-	emcc $(BuildSources) -sWASM=1 -sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sSDL2_IMAGE_FORMATS='["png"]' -sUSE_SDL_TTF=2 -sUSE_SDL_MIXER=2 --preload-file Emscripten -o Emscripten.js
-	cp ../Emscripten.html ./$(AppName.html)
+	mkdir -p ./Build/Web
+	emcc $(BuildSources) $(CFlags) $(Defines) $(LdFlags) --preload-file $(AppAssets) -o ./Build/Web/Emscripten.js
+	cp ../Emscripten.html ./Build/Web/$(AppName).html
 	# TODO: bundle JS, WASM, and assets package in HTML file
 
 # TODO: Fix include substitutions properly in non-standard build processes

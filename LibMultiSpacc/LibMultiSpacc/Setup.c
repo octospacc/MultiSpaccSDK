@@ -43,6 +43,20 @@ MultiSpacc_Surface *MultiSpacc_GetWindowSurface( MultiSpacc_Window *Window )
 	#endif
 }
 
+bool MultiSpacc_SetMainLoop( bool function( void *args ), void *args )
+{
+	#ifdef MultiSpacc_Target_Web
+		emscripten_set_main_loop_arg( (em_arg_callback_func)function, args, -1, true );
+	#else
+		while(true){
+			if( !function(args) ){
+				return false;
+			}
+		}
+	#endif
+	return true;
+}
+
 void MultiSpacc_SetAppTitle( MultiSpacc_Window *Window, const char *Title )
 {
 	#ifdef MultiSpacc_Target_SDL12

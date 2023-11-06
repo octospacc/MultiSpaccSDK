@@ -3,6 +3,7 @@
 void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig *WindowConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ )
 {
 	#ifdef MultiSpacc_Target_SDLCom
+		/* TODO: not just 8x8 tiles */
 		for( int i = 0; i < strlen(Text); i++ )
 		{
 			MultiSpacc_Rect Offset = {
@@ -20,7 +21,7 @@ void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_
 	#endif
 
 	#ifdef MultiSpacc_Target_NDS
-		iprintf("%s", Text);
+		iprintf( "%s", Text );
 	#endif
 
 	#ifdef MultiSpacc_Target_NES
@@ -35,8 +36,8 @@ void MultiSpacc_PrintDebug( const char *format, ... )
 {
 	#ifdef MultiSpacc_Target_SDLCom
 		va_list args;
-		va_start(args, format);
-		fprintf(stderr, format, args);
-		va_end(args);
+		va_start( args, format );
+		fprintf( stderr, format, args );
+		va_end( args );
 	#endif
 }
