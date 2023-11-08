@@ -1,21 +1,33 @@
 #include "./MultiSpacc.h"
 
+MultiSpacc_Surface *MultiSpacc_GetWindowSurface( MultiSpacc_Window *Window )
+{
+	#if defined(MultiSpacc_Target_SDL12)
+		return Window;
+	#elif defined(MultiSpacc_Target_SDL20)
+		return SDL_GetWindowSurface(Window);
+	#elif defined(MultiSpacc_Target_NDS)
+		return Window;
+	#endif
+}
+
 MultiSpacc_Surface *MultiSpacc_LoadImage( char FilePath[], MultiSpacc_Surface *Screen, Uint32 *ColorKey )
 {
 	#ifdef MultiSpacc_Target_SDLCom
 		MultiSpacc_Surface *Final = NULL;
-		MultiSpacc_Surface *Raw = IMG_Load( FilePath );
+		MultiSpacc_Surface *Raw = IMG_Load(FilePath);
 		if( Raw == NULL ) {
-			MultiSpacc_PrintDebug("[E] Error Reading Image %s.\n", FilePath);
+			MultiSpacc_PrintDebug( "[E] Error Reading Image %s.\n", FilePath );
 		} else {
 			Final = SDL_ConvertSurface( Raw, Screen->format, 0 );
-			SDL_FreeSurface( Raw );
+			SDL_FreeSurface(Raw);
 			if( Final == NULL ) {
-				MultiSpacc_PrintDebug("[E] Error Adapting Image %s.\n", FilePath);
+				MultiSpacc_PrintDebug( "[E] Error Adapting Image %s.\n", FilePath );
 			} else {
 				Uint32 FinalColorKey = SDL_MapRGB( Final->format, 0xFF, 0x00, 0xFF ); // Magenta
-				if( ColorKey != NULL )
+				if( ColorKey != NULL ){
 					FinalColorKey = *ColorKey;
+				}
 				MultiSpacc_SetColorKey( Final, true, FinalColorKey );
 			};
 		};
@@ -80,9 +92,9 @@ int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key )
 	}
 #endif
 
-void MultiSpacc_Sprite( int id, int x, int y, int sprite, MultiSpacc_Surface *Tiles, MultiSpacc_Surface *Surface )
+void MultiSpacc_Sprite( int id, int x, int y, int sprite, MultiSpacc_Surface *Tiles, MultiSpacc_Surface *surface )
 {
-	#ifdef MultiSpacc_Target_SDLCom
+	#if defined(MultiSpacc_Target_SDLCom)
 		MultiSpacc_Rect Offset = { .x = x, .y = y, };
 		MultiSpacc_Rect Clip = {
 			.x = (8 * (sprite % 16)),
@@ -90,10 +102,22 @@ void MultiSpacc_Sprite( int id, int x, int y, int sprite, MultiSpacc_Surface *Ti
 			.w = 8,
 			.h = 8,
 		};
-		SDL_BlitSurface( Tiles, &Clip, Surface, &Offset );
-	#endif
-
-	#ifdef MultiSpacc_Target_NES
+		SDL_BlitSurface( Tiles, &Clip, surface, &Offset );
+	#elif defined(MultiSpacc_Target_NES)
 		oam_spr(x, y, sprite, 0, id);
+	#endif
+}
+
+void MultiSpacc_BlitLayer( MultiSpacc_Surface *source, MultiSpacc_Surface *destination )
+{
+	#if defined(MultiSpacc_Target_SDLCom)
+		SDL_BlitSurface( source, NULL, destination, NULL );
+	#endif
+}
+
+MultiSpacc_Surface *MultiSpacc_CreateSurface( MultiSpacc_SurfaceConfig *surfaceConfig )
+{
+	#if defined(MultiSpacc_Target_SDLCom)
+		return SDL_CreateRGBSurface( 0, surfaceConfig->width, surfaceConfig->height, surfaceConfig->bits, 0, 0, 0, 0 );
 	#endif
 }

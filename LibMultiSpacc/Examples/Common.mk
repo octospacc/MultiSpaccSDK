@@ -1,5 +1,5 @@
 AppName = $(notdir $(CURDIR))
-AppAssets = CHARS.png
+AppAssets = ../CHARS.png
 AppSources = $(wildcard *.c)
 AppHeaders = $(wildcard *.h)
 SpaccSources = $(wildcard ../../LibMultiSpacc/*.c)
@@ -125,7 +125,7 @@ __NES__:
 	for i in $(VirtualBuildDir)/*.c $(VirtualBuildDir)/*.h; do sed -i 's|#include[ \t]"./|#include "LibMultiSpacc_|g' $$i; done
 	cp ../../neslib/*.cfg ../../neslib/crt0.o ../../neslib/*.lib ../../neslib/*.h $(VirtualBuildDir)/
 	printf ".segment \"CHARS\"\n\t.incbin \"CHARS.chr\"" > $(VirtualBuildDir)/CHARS.s
-	echo "AppName='$(AppName)'; Defines='$(Defines)'; ProjectRoot=../..;" > $(VirtualBuildDir)/Make.sh
+	echo "ProjectRoot=../..; AppName='$(AppName)'; AppAssets='$(AppAssets)'; Defines='$(Defines)';" > $(VirtualBuildDir)/Make.sh
 	cat ../NES.mk.sh >> $(VirtualBuildDir)/Make.sh
 	cd $(VirtualBuildDir); sh ./Make.sh
 

@@ -2,7 +2,10 @@
 set -e
 SdkRoot="${ProjectRoot}/../../.."
 
-sh "${SdkRoot}/Tools/python3.sh" "${SdkRoot}/Tools/pilbmp2nes.py" -i "${ProjectRoot}/CHARS.png" -o ./CHARS.chr
+# TODO: multiple files
+for File in ${AppAssets}
+do sh "${SdkRoot}/Tools/python3.sh" "${SdkRoot}/Tools/pilbmp2nes.py" -i "${ProjectRoot}/${File}" -o ./CHARS.chr
+done
 
 for File in *.c
 do cc65 -Oirs --target nes ${File} ${Defines}

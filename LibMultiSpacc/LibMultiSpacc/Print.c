@@ -1,9 +1,9 @@
 #include "./MultiSpacc.h"
 
-void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig *WindowConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ )
+void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig *surfaceConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ )
 {
 	#ifdef MultiSpacc_Target_SDLCom
-		/* TODO: not just 8x8 tiles */
+		/* TODO: not just 8x8 tiles, and account for surface dimensions */
 		for( int i = 0; i < strlen(Text); i++ )
 		{
 			MultiSpacc_Rect Offset = {
@@ -37,7 +37,7 @@ void MultiSpacc_PrintDebug( const char *format, ... )
 	#ifdef MultiSpacc_Target_SDLCom
 		va_list args;
 		va_start( args, format );
-		fprintf( stderr, format, args );
-		va_end( args );
+		SDL_Log( format, args );
+		va_end(args);
 	#endif
 }

@@ -67,7 +67,6 @@ void __fastcall__ pal_spr_bright(unsigned char bright);
 void __fastcall__ pal_bg_bright(unsigned char bright);
 
 
-
 // wait actual TV frame, 50hz for PAL, 60hz for NTSC
 void __fastcall__ ppu_wait_nmi(void);
 
@@ -185,14 +184,12 @@ void __fastcall__ bank_spr(unsigned char n);
 void __fastcall__ bank_bg(unsigned char n);
 
 
-
 // get random number 0..255 or 0..65535
 unsigned char __fastcall__ rand8(void);
 unsigned int  __fastcall__ rand16(void);
 
 // set random seed
 void __fastcall__ set_rand(unsigned int seed);
-
 
 
 // when display is enabled, vram access could only be done with this vram update system
@@ -264,7 +261,6 @@ void __fastcall__ oam_meta_spr_clip(signed int x,unsigned char y,const unsigned 
 
 // set NMI/IRQ callback
 void __fastcall__ nmi_set_callback(void (*callback)(void));
-
 
 
 #define PAD_A			0x01

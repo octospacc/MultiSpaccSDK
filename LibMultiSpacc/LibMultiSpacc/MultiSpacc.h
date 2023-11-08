@@ -84,14 +84,14 @@
 #endif
 
 typedef struct MultiSpacc_SurfaceConfig {
-	int Width;
-	int Height;
-	int Bits;
-	char Palette[32];
-	Uint32 Flags;
+	int width;
+	int height;
+	int bits;
+	char palette[32];
+	Uint32 flags;
 } MultiSpacc_SurfaceConfig;
 
-MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig *WindowConfig );
+MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig *windowConfig );
 MultiSpacc_Surface *MultiSpacc_GetWindowSurface( MultiSpacc_Window *Window );
 
 void MultiSpacc_SetAppTitle( MultiSpacc_Window *Window, const char Title[] );
@@ -107,9 +107,12 @@ int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key )
 int MultiSpacc_PollEvent( MultiSpacc_Event *Event );
 
 void MultiSpacc_PrintDebug( const char *format, ... );
-void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig *WindowConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ ); // WIP
+void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig *surfaceConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ ); // WIP
 
-void MultiSpacc_Sprite( int id, int x, int y, int sprite, MultiSpacc_Surface *Tiles, MultiSpacc_Surface *Surface );
+void MultiSpacc_Sprite( int id, int x, int y, int sprite, MultiSpacc_Surface *Tiles, MultiSpacc_Surface *surface );
+
+MultiSpacc_Surface *MultiSpacc_CreateSurface( MultiSpacc_SurfaceConfig *surfaceConfig );
+void MultiSpacc_BlitLayer( MultiSpacc_Surface *source, MultiSpacc_Surface *destination );
 
 #include "./Keys.h"
 
