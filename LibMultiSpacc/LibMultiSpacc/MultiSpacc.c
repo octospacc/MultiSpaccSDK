@@ -92,7 +92,7 @@ int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key )
 	}
 #endif
 
-void MultiSpacc_Sprite( int id, int x, int y, int sprite, MultiSpacc_Surface *Tiles, MultiSpacc_Surface *surface )
+void MultiSpacc_SetSprite( int id, int x, int y, int sprite, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen )
 {
 	#if defined(MultiSpacc_Target_SDLCom)
 		MultiSpacc_Rect Offset = { .x = x, .y = y, };
@@ -102,10 +102,20 @@ void MultiSpacc_Sprite( int id, int x, int y, int sprite, MultiSpacc_Surface *Ti
 			.w = 8,
 			.h = 8,
 		};
-		SDL_BlitSurface( Tiles, &Clip, surface, &Offset );
+		SDL_BlitSurface( tiles, &Clip, screen, &Offset );
 	#elif defined(MultiSpacc_Target_NES)
-		oam_spr(x, y, sprite, 0, id);
+		oam_spr( x, y, sprite, 0, id*4 );
 	#endif
+}
+
+void MultiSpacc_SetMetaSprite( int id, int x, int y, MultiSpacc_SpritesMap *map, int mapSize, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen )
+{
+	int i;
+	for(i=0; i<mapSize; i++)
+	{
+		//oam_spr( (x + map->x[i]), (y + map->y[i]), map->chr[i], 0, (id*4 + 4*i) );
+		MultiSpacc_SetSprite( (id + i), (x + map->x[i]), (y + map->y[i]), map->chr[i], tiles, screen );
+	}
 }
 
 void MultiSpacc_BlitLayer( MultiSpacc_Surface *source, MultiSpacc_Surface *destination )

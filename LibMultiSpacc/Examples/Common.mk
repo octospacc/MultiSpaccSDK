@@ -24,18 +24,18 @@ endif
 
 ifeq ($(Target), LinuxPC)
 	ExeSuffix = .run
-	Defines += -DTarget_LinuxPC
+	Defines += -DTarget_LinuxPC -DMultiSpacc_Target_PC -DMultiSpacc_Target_Linux
 	MultiSpacc_Target = SDL20
 else ifeq ($(Target), WindowsPC)
 	ExeSuffix = .exe
-	Defines += -DTarget_WindowsPC
+	Defines += -DTarget_WindowsPC -DMultiSpacc_Target_PC -DMultiSpacc_Target_Windows
 	MultiSpacc_Target = SDL20
 	ifneq ($(Host), Windows)
 		ToolsSuffix = -mingw-w64
 	endif
 else ifeq ($(Target), Windows9x)
 	ExeSuffix = .exe
-	Defines += -DTarget_Windows9x
+	Defines += -DTarget_Windows9x -DMultiSpacc_Target_PC -DMultiSpacc_Target_Windows
 	MultiSpacc_Target = SDL12
 	LdFlags += -lmingw32 -static-libgcc
 	ifeq ($(Host), Windows)
@@ -59,17 +59,17 @@ else ifeq ($(Target), NES)
 endif
 
 ifeq ($(MultiSpacc_Target), SDL12)
-	Defines += -DMultiSpacc_Target_SDL12 -DMultiSpacc_Target_SDLCom -DMultiSpacc_Target_SDLStandard
+	Defines += -DMultiSpacc_Target_SDL12 -DMultiSpacc_Target_SDLCom -DMultiSpacc_Target_SDLCommon -DMultiSpacc_Target_SDLStandard
 	CFlags += $(shell sdl-config --cflags)
 	LdFlags += $(shell sdl-config --libs) -lSDLmain -lSDL -lSDL_image -lSDL_mixer -lSDL_ttf
 	BuildProcess = __Normal__
 else ifeq ($(MultiSpacc_Target), SDL20)
-	Defines += -DMultiSpacc_Target_SDL20 -DMultiSpacc_Target_SDLCom -DMultiSpacc_Target_SDLStandard
+	Defines += -DMultiSpacc_Target_SDL20 -DMultiSpacc_Target_SDLCom -DMultiSpacc_Target_SDLCommon -DMultiSpacc_Target_SDLStandard
 	CFlags += $(shell sdl2-config --cflags)
 	LdFlags += $(shell sdl2-config --libs) -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
 	BuildProcess = __Normal__
 else ifeq ($(MultiSpacc_Target), Web)
-	Defines += -DMultiSpacc_Target_Web -DMultiSpacc_Target_SDL20 -DMultiSpacc_Target_SDLCom
+	Defines += -DMultiSpacc_Target_Web -DMultiSpacc_Target_SDL20 -DMultiSpacc_Target_SDLCom -DMultiSpacc_Target_SDLCommon -DMultiSpacc_Target_SDLWeb
 	LdFlags += -sWASM=1 -sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sSDL2_IMAGE_FORMATS='["png"]' -sUSE_SDL_TTF=2 -sUSE_SDL_MIXER=2
 	BuildProcess = __Web__
 else ifeq ($(MultiSpacc_Target), NDS)
@@ -99,7 +99,7 @@ __Web__:
 	cp ../Emscripten.html ./Build/Web/$(AppName).html
 	# TODO: bundle JS, WASM, and assets package in HTML file
 
-# TODO: Fix include substitutions properly in non-standard build processes
+# TODO: Fix include substitutions properly in non-standard build processes, and make all custom build processes lest wasteful
 
 __NDS__:
 	$(eval VirtualBuildDir = ./Build/NDS)

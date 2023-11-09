@@ -10,9 +10,8 @@ int ballY;
 int accelX = 2;
 int accelY = 2;
 
-// the Y position of the paddles, measured from the top
-int paddleSx;
-int paddleDx;
+int paddleSxY;
+int paddleDxY;
 
 MultiSpacc_SurfaceConfig windowConfig = {0};
 MultiSpacc_Window *window;
@@ -21,13 +20,18 @@ MultiSpacc_Surface *background;
 MultiSpacc_Surface *tilesImg;
 
 #define BallSize 8
+#define PaddleWidth 8
+#define PaddleHeight 4
 
-#define TileBall   128
-#define TilePaddle 129
+#define BallTile   128
+#define PaddleTile 129
 
-#define SpriteBall     0
-#define SpritePaddleSx 1
-#define SpritePaddleDx 1+4
+#define BallSprite     0
+#define PaddleSxSprite 1
+#define PaddleDxSprite 1 + PaddleHeight
+
+#define PaddleSxX PaddleWidth
+#define PaddleDxX windowConfig.width - 2*PaddleWidth
 
 /*{pal:"nes",layout:"nes"}*/
 const char palette[32] = { 
@@ -42,38 +46,80 @@ const char palette[32] = {
 	0x0d,0x27,0x2a,      // sprite 3
 };
 
+const unsigned char paddleMetaSprite[] = {
+	0,  0, PaddleTile, 0,
+	0,  8, PaddleTile, 0,
+	0, 16, PaddleTile, 0,
+	0, 24, PaddleTile, 0,
+	128
+};
+
 bool MainLoop( void *args )
 {
+	MultiSpacc_SpritesMap msdata;
+
+	int   chr[] = { 129, 129, 129, 129 };
+	int     x[] = { 0, 0,  0,  0 };
+	int     y[] = { 0, 8, 16, 24 };
+
+	msdata.chr = chr;
+	msdata.x = x;
+	msdata.y = y;
+
 	if (!paused)
 	{
 		MultiSpacc_BlitLayer( background, screen );
 
-		MultiSpacc_Sprite( SpriteBall, ballX, ballY, TileBall, tilesImg, screen );
+		MultiSpacc_SetSprite( BallSprite, ballX, ballY, BallTile, tilesImg, screen );
 
-		// TODO: metasprites
+		MultiSpacc_SetMetaSprite( PaddleSxSprite, PaddleSxX, paddleSxY, &msdata, PaddleHeight, tilesImg, screen );
+		MultiSpacc_SetMetaSprite( PaddleDxSprite, PaddleDxX, paddleDxY, &msdata, PaddleHeight, tilesImg, screen );
 
-		MultiSpacc_Sprite( SpritePaddleSx  ,                        BallSize, paddleSx             , TilePaddle, tilesImg, screen );
-		MultiSpacc_Sprite( SpritePaddleSx+1,                        BallSize, paddleSx +   BallSize, TilePaddle, tilesImg, screen );
-		MultiSpacc_Sprite( SpritePaddleSx+2,                        BallSize, paddleSx + 2*BallSize, TilePaddle, tilesImg, screen );
-		MultiSpacc_Sprite( SpritePaddleSx+3,                        BallSize, paddleSx + 3*BallSize, TilePaddle, tilesImg, screen );
+		//oam_meta_spr(                        PaddleWidth, paddleSxY,  4, paddleMetaSprite );
+		//oam_meta_spr( windowConfig.width - 2*PaddleWidth, paddleDxY, 20, paddleMetaSprite );
 
-		MultiSpacc_Sprite( SpritePaddleDx  , windowConfig.width - 2*BallSize, paddleDx             , TilePaddle, tilesImg, screen );
-		MultiSpacc_Sprite( SpritePaddleDx+1, windowConfig.width - 2*BallSize, paddleDx +   BallSize, TilePaddle, tilesImg, screen );
-		MultiSpacc_Sprite( SpritePaddleDx+2, windowConfig.width - 2*BallSize, paddleDx + 2*BallSize, TilePaddle, tilesImg, screen );
-		MultiSpacc_Sprite( SpritePaddleDx+3, windowConfig.width - 2*BallSize, paddleDx + 3*BallSize, TilePaddle, tilesImg, screen );
+		// MultiSpacc_Sprite( PaddleSxSprite  ,                        PaddleWidth, paddleSxY                , PaddleTile, tilesImg, screen );
+		// MultiSpacc_Sprite( PaddleSxSprite+1,                        PaddleWidth, paddleSxY +   PaddleWidth, PaddleTile, tilesImg, screen );
+		// MultiSpacc_Sprite( PaddleSxSprite+2,                        PaddleWidth, paddleSxY + 2*PaddleWidth, PaddleTile, tilesImg, screen );
+		// MultiSpacc_Sprite( PaddleSxSprite+3,                        PaddleWidth, paddleSxY + 3*PaddleWidth, PaddleTile, tilesImg, screen );
+
+		// MultiSpacc_Sprite( PaddleDxSprite  , windowConfig.width - 2*PaddleWidth, paddleDxY                , PaddleTile, tilesImg, screen );
+		// MultiSpacc_Sprite( PaddleDxSprite+1, windowConfig.width - 2*PaddleWidth, paddleDxY +   PaddleWidth, PaddleTile, tilesImg, screen );
+		// MultiSpacc_Sprite( PaddleDxSprite+2, windowConfig.width - 2*PaddleWidth, paddleDxY + 2*PaddleWidth, PaddleTile, tilesImg, screen );
+		// MultiSpacc_Sprite( PaddleDxSprite+3, windowConfig.width - 2*PaddleWidth, paddleDxY + 3*PaddleWidth, PaddleTile, tilesImg, screen );
 
 		ballX += accelX;
 		ballY += accelY;
 
-		if( ballX == 0 || ballX == ( windowConfig.width - 8 ) )
+		if( ballX <= 0 || ballX >= (windowConfig.width - BallSize) )
 		{
 			accelX *= -1;
 		}
 
-		if( ballY == 0 || ballY == ( windowConfig.height - 8 ) )
+		if( ballY <= 0 || ballY >= (windowConfig.height - BallSize) )
 		{
 			accelY *= -1;
 		}
+
+		#define TouchingPaddleSx ( ballX <= PaddleSxX+BallSize && ballY >= paddleSxY-BallSize && ballY <= (paddleSxY + 8*PaddleHeight) )
+		#define TouchingPaddleDx ( ballX >= PaddleDxX-BallSize && ballY >= paddleDxY-BallSize && ballY <= (paddleDxY + 8*PaddleHeight) )
+		if( TouchingPaddleSx || TouchingPaddleDx )
+		{
+			accelX *= -1;
+		}
+	}
+	else
+	{
+		MultiSpacc_PrintText( "Pause", background, &windowConfig, 3, 3, tilesImg );
+	}
+
+	if( paddleSxY > 0 && MultiSpacc_CheckKey( MultiSpacc_Key_Up, 0 ) )
+	{
+		--paddleSxY;
+	}
+	else if( paddleSxY < (windowConfig.height - 8*PaddleHeight) && MultiSpacc_CheckKey( MultiSpacc_Key_Down, 0 ) )
+	{
+		++paddleSxY;
 	}
 
 	/* TODO: listen for OS terminate signal */
@@ -121,8 +167,8 @@ int main( int argc, char *argv[] )
 
 	ballX = windowConfig.width/2;
 	ballY = windowConfig.height/2;
-	paddleSx = windowConfig.height/2 - 24;
-	paddleDx = windowConfig.height/2 - 24;
+	paddleSxY = windowConfig.height/2 - 24;
+	paddleDxY = windowConfig.height/2 - 24;
 
 	return MultiSpacc_SetMainLoop( MainLoop, NULL );
 }

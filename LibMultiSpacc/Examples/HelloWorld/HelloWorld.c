@@ -37,7 +37,7 @@ bool MainLoop( void *args )
 	//SDL_FillRect(margs->Background, &rect, 0x000000);
 	MultiSpacc_BlitLayer( margs->background, margs->screen );
 	//SDL_BlitSurface( margs->Foreground, &rect, margs->Screen, &rect );
-	MultiSpacc_Sprite( 0, margs->spriteX, margs->spriteY, 1, margs->tilesImg, margs->screen );
+	MultiSpacc_SetSprite( 0, margs->spriteX, margs->spriteY, 1, margs->tilesImg, margs->screen );
 	//scroll(spriteX,0);
 
 	margs->spriteX += margs->accelX;

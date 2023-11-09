@@ -39,3 +39,12 @@ bool MultiSpacc_WaitUpdateDisplay( MultiSpacc_Window *window, Uint32 *nextTick )
 	}
 	return true;
 }
+
+// #if defined(MultiSpacc_Target_NES)
+	// bool MultiSpacc_WaitUpdateDisplay_NES(void)
+	// {
+		// MultiSpacc_UpdateDisplay(NULL);
+		// MultiSpacc_WaitFrame(NULL);
+		// return true;
+	// }
+// #endif

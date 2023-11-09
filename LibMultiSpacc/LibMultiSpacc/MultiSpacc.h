@@ -63,6 +63,7 @@
 	#define MultiSpacc_Window char
 	#define MultiSpacc_Surface char
 	#define MultiSpacc_Event char
+	#define main( argc, argv ) main(void)
 #endif
 
 #ifdef MultiSpacc_Target_SDLCom
@@ -91,6 +92,13 @@ typedef struct MultiSpacc_SurfaceConfig {
 	Uint32 flags;
 } MultiSpacc_SurfaceConfig;
 
+typedef struct MultiSpacc_SpritesMap {
+	int *chr;
+	int *x;
+	int *y;
+	int *flags;	
+} MultiSpacc_SpritesMap;
+
 MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig *windowConfig );
 MultiSpacc_Surface *MultiSpacc_GetWindowSurface( MultiSpacc_Window *Window );
 
@@ -99,21 +107,21 @@ void MultiSpacc_SetAppIcon( MultiSpacc_Window *Window, MultiSpacc_Surface *Icon 
 
 bool MultiSpacc_SetMainLoop( bool function( void *args ), void *args );
 
-bool MultiSpacc_WaitUpdateDisplay( MultiSpacc_Window *window, Uint32 *nextTick );
-
 MultiSpacc_Surface *MultiSpacc_LoadImage( char FilePath[], MultiSpacc_Surface *Screen, Uint32 *ColorKey );
 int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key );
 
 int MultiSpacc_PollEvent( MultiSpacc_Event *Event );
 
-void MultiSpacc_PrintDebug( const char *format, ... );
 void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig *surfaceConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ ); // WIP
+void MultiSpacc_PrintDebug( const char *format, ... );
 
-void MultiSpacc_Sprite( int id, int x, int y, int sprite, MultiSpacc_Surface *Tiles, MultiSpacc_Surface *surface );
+void MultiSpacc_SetSprite( int id, int x, int y, int sprite, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen );
+void MultiSpacc_SetMetaSprite( int id, int x, int y, MultiSpacc_SpritesMap *map, int mapSize, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen );
 
 MultiSpacc_Surface *MultiSpacc_CreateSurface( MultiSpacc_SurfaceConfig *surfaceConfig );
 void MultiSpacc_BlitLayer( MultiSpacc_Surface *source, MultiSpacc_Surface *destination );
 
 #include "./Keys.h"
+#include "./VideoCycle.h"
 
 #endif // _MultiSpacc_MultiSpacc_h_
