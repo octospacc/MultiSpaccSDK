@@ -10,6 +10,7 @@ before_script: |
   curl -o ./mingw32.7z https://hlb0.octt.eu.org/Drive/Misc/mingw32-9.2.0.7z.sfx.exe
   7z x ./mingw32.7z
   cp ./mingw32/bin/*.dll ./mingw32/libexec/gcc/mingw32/9.2.0/
+  mkdir -p /opt/Sdk
   mv ./mingw32 /opt/Sdk/mingw32
   curl https://apt.devkitpro.org/install-devkitpro-pacman | bash
   dkp-pacman -Sy nds-dev

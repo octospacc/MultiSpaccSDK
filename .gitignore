@@ -4,5 +4,7 @@
 *.exe
 *.run
 *.tmp
+stdout.txt
+stderr.txt
 .tmp/
 Build/

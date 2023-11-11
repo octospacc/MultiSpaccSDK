@@ -1,6 +1,9 @@
 #ifndef _MultiSpacc_MultiSpacc_h_
 #define _MultiSpacc_MultiSpacc_h_
 
+// Fixed amount of times per second to call the FixedUpdate function
+#define MultiSpacc_GameTick 50
+
 #include <stdarg.h>
 #ifndef MultiSpacc_Target_NES
 	#include <stdbool.h>
@@ -59,6 +62,8 @@
 #ifdef MultiSpacc_Target_NES
 	#include <nes.h>
 	#include "neslib.h"
+	#define float int
+	#define double int
 	#define Uint32 int
 	#define MultiSpacc_Window char
 	#define MultiSpacc_Surface char
@@ -99,13 +104,25 @@ typedef struct MultiSpacc_SpritesMap {
 	int *flags;	
 } MultiSpacc_SpritesMap;
 
+typedef struct MultiSpacc_MainLoopHandlerArgs {
+	bool (*functionFixedUpdate)( void *args );
+	bool (*functionRealUpdate)( void *args, double deltaTime );
+	void *args;
+	//Uint32 *nextTick;
+	//Uint32 ticksLast;
+	Uint32 elapsedRealTime;
+	Uint32 elapsedFixedTime;
+} MultiSpacc_MainLoopHandlerArgs;
+
+bool MultiSpacc_MainLoopHandler( MultiSpacc_MainLoopHandlerArgs *handlerArgs );
+
 MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig *windowConfig );
 MultiSpacc_Surface *MultiSpacc_GetWindowSurface( MultiSpacc_Window *Window );
 
 void MultiSpacc_SetAppTitle( MultiSpacc_Window *Window, const char Title[] );
 void MultiSpacc_SetAppIcon( MultiSpacc_Window *Window, MultiSpacc_Surface *Icon );
 
-bool MultiSpacc_SetMainLoop( bool function( void *args ), void *args );
+bool MultiSpacc_SetMainLoop( bool functionFixedUpdate( void *args ), bool functionRealUpdate( void *args, double deltaTime ), Uint32 *nextTick, void *args );
 
 MultiSpacc_Surface *MultiSpacc_LoadImage( char FilePath[], MultiSpacc_Surface *Screen, Uint32 *ColorKey );
 int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key );

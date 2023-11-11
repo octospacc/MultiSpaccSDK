@@ -95,7 +95,7 @@ __Normal__: $(BuildObjects)
 
 __Web__:
 	mkdir -p ./Build/Web
-	emcc $(BuildSources) $(CFlags) $(Defines) $(LdFlags) --preload-file $(AppAssets) -o ./Build/Web/Emscripten.js
+	emcc $(BuildSources) $(CFlags) $(Defines) $(LdFlags) --preload-file $(AppAssets)@CHARS.png -o ./Build/Web/Emscripten.js
 	cp ../Emscripten.html ./Build/Web/$(AppName).html
 	# TODO: bundle JS, WASM, and assets package in HTML file
 

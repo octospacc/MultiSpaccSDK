@@ -13,6 +13,9 @@ int accelY = 2;
 int paddleSxY;
 int paddleDxY;
 
+char paddleSxMove = 0;
+char paddleDxMove = 0;
+
 MultiSpacc_SurfaceConfig windowConfig = {0};
 MultiSpacc_Window *window;
 MultiSpacc_Surface *screen;
@@ -32,6 +35,9 @@ MultiSpacc_Surface *tilesImg;
 
 #define PaddleSxX PaddleWidth
 #define PaddleDxX windowConfig.width - 2*PaddleWidth
+
+#define PaddleAccel 2
+#define DeltaTime 1
 
 /*{pal:"nes",layout:"nes"}*/
 const char palette[32] = { 
@@ -54,17 +60,104 @@ const unsigned char paddleMetaSprite[] = {
 	128
 };
 
+MultiSpacc_SpritesMap msdata;
+
+bool FixedUpdate( void *args )
+{
+	if(!paused)
+	{
+		ballX += accelX * DeltaTime;
+		ballY += accelY * DeltaTime;
+
+		if( ballX <= 0 || ballX >= (windowConfig.width - BallSize) )
+		{
+			accelX *= -1;
+		}
+
+		if( ballY <= 0 || ballY >= (windowConfig.height - BallSize) )
+		{
+			accelY *= -1;
+		}
+
+		#define TouchingPaddleSx ( ballX <= PaddleSxX+BallSize && ballY >= paddleSxY-BallSize && ballY <= (paddleSxY + 8*PaddleHeight) )
+		#define TouchingPaddleDx ( ballX >= PaddleDxX-BallSize && ballY >= paddleDxY-BallSize && ballY <= (paddleDxY + 8*PaddleHeight) )
+		if( TouchingPaddleSx || TouchingPaddleDx )
+		{
+			accelX *= -1;
+		}
+
+		if (paddleSxMove == 1)
+		{
+			paddleSxY -= PaddleAccel * DeltaTime;
+			paddleSxMove = 0;
+		}
+		else if (paddleSxMove == 2)
+		{
+			paddleSxY += PaddleAccel * DeltaTime;
+			paddleSxMove = 0;
+		}
+	}
+
+	return true;
+}
+
+bool RealUpdate( void *args, double deltaTime )
+{
+	//MultiSpacc_WaitFrame(&nextTick);
+
+	if(!paused)
+	{
+		MultiSpacc_BlitLayer( background, screen );
+//printf("%d %f %f %d\n", ballX, deltaTime, accelX*deltaTime, ballX+accelX*deltaTime);
+		MultiSpacc_SetSprite( BallSprite, ballX+accelX*deltaTime, ballY+accelY*deltaTime, BallTile, tilesImg, screen );
+
+		#define PaddleSxYDisplay (paddleSxMove == 0 ? paddleSxY : paddleSxY+PaddleAccel*deltaTime)
+		#define PaddleDxYDisplay (paddleDxMove == 0 ? paddleDxY : paddleDxY+PaddleAccel*deltaTime)
+		MultiSpacc_SetMetaSprite( PaddleSxSprite, PaddleSxX, paddleSxY, &msdata, PaddleHeight, tilesImg, screen );
+		MultiSpacc_SetMetaSprite( PaddleDxSprite, PaddleDxX, paddleDxY, &msdata, PaddleHeight, tilesImg, screen );
+	}
+
+	if( paddleSxY > 0 && MultiSpacc_CheckKey( MultiSpacc_Key_Up, 0 ) )
+	{
+		//paddleSxY -= PaddleAccel * DeltaTime;
+		paddleSxMove = 1;
+	}
+	else if( paddleSxY < (windowConfig.height - 8*PaddleHeight) && MultiSpacc_CheckKey( MultiSpacc_Key_Down, 0 ) )
+	{
+		//paddleSxY += PaddleAccel * DeltaTime;
+		paddleSxMove = 2;
+	}
+
+	// TODO: listen for OS terminate signal
+	// TODO: fix SDL not waiting for key release with inputs checked this way
+	if( MultiSpacc_CheckKey( MultiSpacc_Key_Pause, 0 ) )
+	{
+		if(!paused)
+		{
+			paused = true;
+			MultiSpacc_PrintText( "Pause", background, &windowConfig, 3, 3, tilesImg );
+		}
+		else
+		{
+			MultiSpacc_PrintText( "Exit", background, &windowConfig, 3, 3, tilesImg );
+			return false;
+		}
+	}
+
+	//if( !MultiSpacc_WaitUpdateDisplay( window, &nextTick ) )
+	if( !MultiSpacc_UpdateDisplay(window) )
+	{
+		MultiSpacc_PrintDebug("[E] Error Updating Screen.\n");
+		return false;
+	}
+
+	return true;
+}
+
+/*
 bool MainLoop( void *args )
 {
-	MultiSpacc_SpritesMap msdata;
-
-	int   chr[] = { 129, 129, 129, 129 };
-	int     x[] = { 0, 0,  0,  0 };
-	int     y[] = { 0, 8, 16, 24 };
-
-	msdata.chr = chr;
-	msdata.x = x;
-	msdata.y = y;
+	MultiSpacc_WaitFrame(&nextTick);
 
 	if (!paused)
 	{
@@ -75,21 +168,8 @@ bool MainLoop( void *args )
 		MultiSpacc_SetMetaSprite( PaddleSxSprite, PaddleSxX, paddleSxY, &msdata, PaddleHeight, tilesImg, screen );
 		MultiSpacc_SetMetaSprite( PaddleDxSprite, PaddleDxX, paddleDxY, &msdata, PaddleHeight, tilesImg, screen );
 
-		//oam_meta_spr(                        PaddleWidth, paddleSxY,  4, paddleMetaSprite );
-		//oam_meta_spr( windowConfig.width - 2*PaddleWidth, paddleDxY, 20, paddleMetaSprite );
-
-		// MultiSpacc_Sprite( PaddleSxSprite  ,                        PaddleWidth, paddleSxY                , PaddleTile, tilesImg, screen );
-		// MultiSpacc_Sprite( PaddleSxSprite+1,                        PaddleWidth, paddleSxY +   PaddleWidth, PaddleTile, tilesImg, screen );
-		// MultiSpacc_Sprite( PaddleSxSprite+2,                        PaddleWidth, paddleSxY + 2*PaddleWidth, PaddleTile, tilesImg, screen );
-		// MultiSpacc_Sprite( PaddleSxSprite+3,                        PaddleWidth, paddleSxY + 3*PaddleWidth, PaddleTile, tilesImg, screen );
-
-		// MultiSpacc_Sprite( PaddleDxSprite  , windowConfig.width - 2*PaddleWidth, paddleDxY                , PaddleTile, tilesImg, screen );
-		// MultiSpacc_Sprite( PaddleDxSprite+1, windowConfig.width - 2*PaddleWidth, paddleDxY +   PaddleWidth, PaddleTile, tilesImg, screen );
-		// MultiSpacc_Sprite( PaddleDxSprite+2, windowConfig.width - 2*PaddleWidth, paddleDxY + 2*PaddleWidth, PaddleTile, tilesImg, screen );
-		// MultiSpacc_Sprite( PaddleDxSprite+3, windowConfig.width - 2*PaddleWidth, paddleDxY + 3*PaddleWidth, PaddleTile, tilesImg, screen );
-
-		ballX += accelX;
-		ballY += accelY;
+		ballX += accelX * DeltaTime;
+		ballY += accelY * DeltaTime;
 
 		if( ballX <= 0 || ballX >= (windowConfig.width - BallSize) )
 		{
@@ -115,21 +195,22 @@ bool MainLoop( void *args )
 
 	if( paddleSxY > 0 && MultiSpacc_CheckKey( MultiSpacc_Key_Up, 0 ) )
 	{
-		--paddleSxY;
+		paddleSxY -= PaddleAccel * DeltaTime;
 	}
 	else if( paddleSxY < (windowConfig.height - 8*PaddleHeight) && MultiSpacc_CheckKey( MultiSpacc_Key_Down, 0 ) )
 	{
-		++paddleSxY;
+		paddleSxY += PaddleAccel * DeltaTime;
 	}
 
-	/* TODO: listen for OS terminate signal */
+	// TODO: listen for OS terminate signal
 	if( MultiSpacc_CheckKey( MultiSpacc_Key_Pause, 0 ) )
 	{
 		if (!paused) paused = true;
 		else return false;
 	}
 
-	if( !MultiSpacc_WaitUpdateDisplay( window, &nextTick ) )
+	//if( !MultiSpacc_WaitUpdateDisplay( window, &nextTick ) )
+	if( !MultiSpacc_UpdateDisplay(window) )
 	{
 		MultiSpacc_PrintDebug("[E] Error Updating Screen.\n");
 		return false;
@@ -137,10 +218,18 @@ bool MainLoop( void *args )
 
 	return true;
 }
+*/
 
 int main( int argc, char *argv[] )
 {
-	windowConfig.width = 320;
+	int   chr[] = { 129, 129, 129, 129 };
+	int     x[] = { 0, 0,  0,  0 };
+	int     y[] = { 0, 8, 16, 24 };
+	msdata.chr = chr;
+	msdata.x = x;
+	msdata.y = y;
+
+	windowConfig.width = 256;
 	windowConfig.height = 240;
 	windowConfig.bits = 16;
 	memcpy( windowConfig.palette, palette, 32 );
@@ -170,5 +259,6 @@ int main( int argc, char *argv[] )
 	paddleSxY = windowConfig.height/2 - 24;
 	paddleDxY = windowConfig.height/2 - 24;
 
-	return MultiSpacc_SetMainLoop( MainLoop, NULL );
+	//return MultiSpacc_SetMainLoop( MainLoop, NULL );
+	return MultiSpacc_SetMainLoop( FixedUpdate, RealUpdate, &nextTick, NULL );
 }
