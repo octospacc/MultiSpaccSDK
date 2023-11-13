@@ -58,7 +58,7 @@ bool MainLoop( void *args )
 		return false;
 	}
 
-	if( !MultiSpacc_WaitUpdateDisplay( margs->window, &nextTick ) )
+	if( !MultiSpacc_UpdateDisplay( margs->window ) )
 	{
 		MultiSpacc_PrintDebug("[E] Error Updating Screen.\n");
 		return false;
@@ -104,5 +104,5 @@ int main( int argc, char *argv[] )
 
 	MultiSpacc_PrintText( "Hello, World!", margs.background, &windowConfig, 2, 2, margs.tilesImg );
 
-	return MultiSpacc_SetMainLoop( MainLoop, &margs );
+	return MultiSpacc_SetMainLoop( MainLoop, NULL, &margs );
 }

@@ -66,8 +66,13 @@ int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key )
 #ifndef MultiSpacc_Target_SDLCom
 	void MultiSpacc_Sleep( int milliseconds )
 	{
-		/* TODO: 50 or 60 FPS based on region for appropriate consoles */
-		int frames = (60 * milliseconds / 1000);
+		#if defined(MultiSpacc_Target_NDS)
+			#define NativeFps 60
+		#elif defined(MultiSpacc_Target_NES)
+			#define NativeFps 50
+		#endif
+
+		int frames = (NativeFps * milliseconds / 1000);
 		while( --frames )
 		{
 			#if defined(MultiSpacc_Target_NDS)
@@ -135,40 +140,54 @@ MultiSpacc_Surface *MultiSpacc_CreateSurface( MultiSpacc_SurfaceConfig *surfaceC
 // partially copied from Unity's implementation, see <https://docs.unity3d.com/Manual/TimeFrameManagement.html>
 bool MultiSpacc_MainLoopHandler( MultiSpacc_MainLoopHandlerArgs *handlerArgs )
 {
-	#if defined(MultiSpacc_Target_SDLStandard)
-		//if( !handlerArgs->functionFixedUpdate(handlerArgs->args) || !handlerArgs->functionUpdate( handlerArgs->args, *handlerArgs->nextTick ) ){
-		//	return false;
-		//}
+	#define AssertDirectCallUpdates ( ( handlerArgs->functionFixedUpdate != NULL && !handlerArgs->functionFixedUpdate(handlerArgs->args) ) || ( handlerArgs->functionRealUpdate != NULL && !handlerArgs->functionRealUpdate( handlerArgs->args, 1 ) ) )
 
+	#if defined(MultiSpacc_Target_SDLCommon)
 		Uint32 ticksNow;
-		Uint32 deltaTime;
-		//int cyclesSinceLast;
+		Uint32 realDeltaTime;
+		double fixedDeltaTime;
 
-		//MultiSpacc_WaitFrame(handlerArgs->nextTick);
 		ticksNow = SDL_GetTicks();
-		deltaTime = (ticksNow - handlerArgs->elapsedRealTime);
-		handlerArgs->elapsedRealTime += deltaTime;
-		//cyclesSinceLast = deltaTime / (1000 / MultiSpacc_GameTick);
+		realDeltaTime = (ticksNow - handlerArgs->elapsedRealTime);
+		handlerArgs->elapsedRealTime += realDeltaTime;
+		fixedDeltaTime = (double)(handlerArgs->elapsedRealTime - handlerArgs->elapsedFixedTime) / (double)(1000 / MultiSpacc_GameTick);
 
-		while ( handlerArgs->elapsedRealTime - handlerArgs->elapsedFixedTime > (1000 / MultiSpacc_GameTick) ) {
-		//for( int i=0; i<cyclesSinceLast; i++ ){
-		//if( handlerArgs->elapsedTime - handlerArgs->elapsedFixedTime > (1000 / MultiSpacc_GameTick) ){
-			if( !handlerArgs->functionFixedUpdate(handlerArgs->args) ){
+		while ( (handlerArgs->elapsedRealTime - handlerArgs->elapsedFixedTime) > (1000 / MultiSpacc_GameTick) ) {
+			if( handlerArgs->functionFixedUpdate != NULL && !handlerArgs->functionFixedUpdate(handlerArgs->args) ){
 				return false;
 			}
-			//handlerArgs->ticksLast = SDL_GetTicks();
 			handlerArgs->elapsedFixedTime += (1000 / MultiSpacc_GameTick);
 		}
 
-		if( !handlerArgs->functionRealUpdate( handlerArgs->args, (double)(handlerArgs->elapsedRealTime - handlerArgs->elapsedFixedTime)/((double)1000 / MultiSpacc_GameTick) ) ){
+		// TODO: limit real updates on native platforms, otherwise we waste infinite CPU cycles
+		if( handlerArgs->functionRealUpdate != NULL && !handlerArgs->functionRealUpdate( handlerArgs->args, fixedDeltaTime ) ){
 			return false;
 		}
+
 	#elif defined(MultiSpacc_Target_NES)
 		ppu_wait_frame();
-		if( !handlerArgs->functionFixedUpdate(handlerArgs->args) || !handlerArgs->functionRealUpdate( handlerArgs->args, 1 ) ){
-			
+		if( AssertDirectCallUpdates ){
+			return false;
 		}
-	#endif
 
+	#elif defined(MultiSpacc_Target_NDS)
+		// TODO: limit FixedUpdate to 50 FPS, since NDS vblank is 60 Hz
+		swiWaitForVBlank();
+		if( AssertDirectCallUpdates ){
+			return false;
+		}
+
+	#endif
 	return true;
+}
+
+bool MultiSpacc_UpdateDisplay( MultiSpacc_Window *window )
+{
+	#if defined(MultiSpacc_Target_SDL12)
+		return !SDL_Flip(window);
+	#elif defined(MultiSpacc_Target_SDL20)
+		return !SDL_UpdateWindowSurface(window);
+	#else
+		return true;
+	#endif
 }

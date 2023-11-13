@@ -3,18 +3,20 @@
 #define AppName "Pong"
 
 bool paused = false;
-Uint32 nextTick;
+int scoreSx = 0;
+int scoreDx = 0;
 
 int ballX;
 int ballY;
-int accelX = 2;
-int accelY = 2;
+int accelX = 3;
+int accelY = 3;
 
 int paddleSxY;
 int paddleDxY;
+signed char paddleSxMove = 0;
+signed char paddleDxMove = 0;
 
-char paddleSxMove = 0;
-char paddleDxMove = 0;
+char scoreChar[6];
 
 MultiSpacc_SurfaceConfig windowConfig = {0};
 MultiSpacc_Window *window;
@@ -24,20 +26,20 @@ MultiSpacc_Surface *tilesImg;
 
 #define BallSize 8
 #define PaddleWidth 8
-#define PaddleHeight 4
+#define PaddleHeightTiles 4
+#define PaddleHeightPx 8*PaddleHeightTiles
 
 #define BallTile   128
 #define PaddleTile 129
 
 #define BallSprite     0
 #define PaddleSxSprite 1
-#define PaddleDxSprite 1 + PaddleHeight
+#define PaddleDxSprite 1 + PaddleHeightTiles
 
 #define PaddleSxX PaddleWidth
 #define PaddleDxX windowConfig.width - 2*PaddleWidth
 
-#define PaddleAccel 2
-#define DeltaTime 1
+#define PaddleAccel 4
 
 /*{pal:"nes",layout:"nes"}*/
 const char palette[32] = { 
@@ -62,74 +64,133 @@ const unsigned char paddleMetaSprite[] = {
 
 MultiSpacc_SpritesMap msdata;
 
+void ResetBall(void)
+{
+	ballX = windowConfig.width/2;
+	ballY = windowConfig.height/2;
+}
+
+void UpdateBall(void)
+{
+	ballX += accelX;
+	ballY += accelY;
+
+	if( ballX <= 0-BallSize )
+	{
+		++scoreDx;
+		ResetBall();
+	}
+	else if( ballX >= windowConfig.width )
+	{
+		++scoreSx;
+		ResetBall();
+	}
+
+	#define IsTouchingPaddleSx ( ballX >= PaddleSxX-BallSize && ballX <= PaddleSxX+BallSize && ballY >= paddleSxY-BallSize && ballY <= paddleSxY+PaddleHeightPx )
+	#define IsTouchingPaddleDx ( ballX >= PaddleDxX-BallSize && ballX <= PaddleDxX+BallSize && ballY >= paddleDxY-BallSize && ballY <= paddleDxY+PaddleHeightPx )
+
+	if( IsTouchingPaddleSx || IsTouchingPaddleDx )
+	{
+		accelX *= -1;
+		ballX += accelX;
+		ballY += accelY;
+	}
+
+	// TODO: fix collision with upper borders of paddle, currently too aggressive and also broken? disabling everything makes the ball stick to paddles tho --- edit: with current setup it's kinda better but can still get stuck near the bottom/top of the screen and between paddle and side border, should fix (simply: don't allow paddle or ball near the very bottom of screen, put a mini-wall)
+	if( ballY <= 0 || ballY >= (windowConfig.height - BallSize) || (IsTouchingPaddleSx && ballX >= PaddleSxX && ballX <= PaddleSxX+BallSize) || (IsTouchingPaddleDx && ballX >= PaddleDxX && ballX <= PaddleDxX+BallSize) )
+	{
+		accelY *= -1;
+		ballX += accelX;
+		ballY += accelY;
+	}
+}
+
+void UpdatePlayer(void)
+{
+	// if (paddleSxMove == -1)
+	// {
+		// paddleSxY -= PaddleAccel;
+		// paddleSxMove = 0;
+	// }
+	// else if (paddleSxMove == +1)
+	// {
+		// paddleSxY += PaddleAccel;
+		// paddleSxMove = 0;
+	// }
+	paddleSxY += PaddleAccel*paddleSxMove;
+	paddleSxMove = 0;
+}
+
+void UpdateCpuPlayer(void)
+{
+	#define PaddleDxYCenter paddleDxY+PaddleHeightPx/2
+	if( accelX <= 0 )
+	{
+		if( paddleDxY < windowConfig.height/2 )
+		{
+			paddleDxY += PaddleAccel;
+		}
+		else if( paddleDxY > windowConfig.height/2 )
+		{
+			paddleDxY -= PaddleAccel;
+		}
+	}
+	else if( rand() % PaddleAccel != 1 )
+	{
+		if ( PaddleDxYCenter < ballY )
+		{
+			paddleDxY += PaddleAccel;
+		}
+		else if ( PaddleDxYCenter > ballY )
+		{
+			paddleDxY -= PaddleAccel;
+		}
+	}
+}
+
 bool FixedUpdate( void *args )
 {
 	if(!paused)
 	{
-		ballX += accelX * DeltaTime;
-		ballY += accelY * DeltaTime;
-
-		if( ballX <= 0 || ballX >= (windowConfig.width - BallSize) )
-		{
-			accelX *= -1;
-		}
-
-		if( ballY <= 0 || ballY >= (windowConfig.height - BallSize) )
-		{
-			accelY *= -1;
-		}
-
-		#define TouchingPaddleSx ( ballX <= PaddleSxX+BallSize && ballY >= paddleSxY-BallSize && ballY <= (paddleSxY + 8*PaddleHeight) )
-		#define TouchingPaddleDx ( ballX >= PaddleDxX-BallSize && ballY >= paddleDxY-BallSize && ballY <= (paddleDxY + 8*PaddleHeight) )
-		if( TouchingPaddleSx || TouchingPaddleDx )
-		{
-			accelX *= -1;
-		}
-
-		if (paddleSxMove == 1)
-		{
-			paddleSxY -= PaddleAccel * DeltaTime;
-			paddleSxMove = 0;
-		}
-		else if (paddleSxMove == 2)
-		{
-			paddleSxY += PaddleAccel * DeltaTime;
-			paddleSxMove = 0;
-		}
+		UpdateBall();
+		UpdatePlayer();
+		UpdateCpuPlayer();
 	}
-
 	return true;
 }
 
 bool RealUpdate( void *args, double deltaTime )
 {
-	//MultiSpacc_WaitFrame(&nextTick);
-
 	if(!paused)
 	{
+		//SDL_FillRect( background, &background->clip_rect, SDL_MapRGB( background->format, 0, 0, 0 ) );
 		MultiSpacc_BlitLayer( background, screen );
-//printf("%d %f %f %d\n", ballX, deltaTime, accelX*deltaTime, ballX+accelX*deltaTime);
+
 		MultiSpacc_SetSprite( BallSprite, ballX+accelX*deltaTime, ballY+accelY*deltaTime, BallTile, tilesImg, screen );
 
-		#define PaddleSxYDisplay (paddleSxMove == 0 ? paddleSxY : paddleSxY+PaddleAccel*deltaTime)
-		#define PaddleDxYDisplay (paddleDxMove == 0 ? paddleDxY : paddleDxY+PaddleAccel*deltaTime)
-		MultiSpacc_SetMetaSprite( PaddleSxSprite, PaddleSxX, paddleSxY, &msdata, PaddleHeight, tilesImg, screen );
-		MultiSpacc_SetMetaSprite( PaddleDxSprite, PaddleDxX, paddleDxY, &msdata, PaddleHeight, tilesImg, screen );
-	}
+		#define PaddleSxYDisplay (paddleSxY + PaddleAccel*paddleSxMove*deltaTime)
+		#define PaddleDxYDisplay (paddleDxY + PaddleAccel*paddleDxMove*deltaTime)
+		MultiSpacc_SetMetaSprite( PaddleSxSprite, PaddleSxX, PaddleSxYDisplay, &msdata, PaddleHeightTiles, tilesImg, screen );
+		MultiSpacc_SetMetaSprite( PaddleDxSprite, PaddleDxX, PaddleDxYDisplay, &msdata, PaddleHeightTiles, tilesImg, screen );
 
-	if( paddleSxY > 0 && MultiSpacc_CheckKey( MultiSpacc_Key_Up, 0 ) )
-	{
-		//paddleSxY -= PaddleAccel * DeltaTime;
-		paddleSxMove = 1;
-	}
-	else if( paddleSxY < (windowConfig.height - 8*PaddleHeight) && MultiSpacc_CheckKey( MultiSpacc_Key_Down, 0 ) )
-	{
-		//paddleSxY += PaddleAccel * DeltaTime;
-		paddleSxMove = 2;
+		//itoa(scoreSx, scoreChar, 10);
+		//MultiSpacc_PrintText( scoreChar, screen, &windowConfig, 1, 1, tilesImg );
+		//itoa(scoreDx, scoreChar, 10);
+		//MultiSpacc_PrintText( scoreChar, screen, &windowConfig, windowConfig.width/8-6, 1, tilesImg );
+
+		if( paddleSxY > 0 && MultiSpacc_CheckKey( MultiSpacc_Key_Up, 0 ) )
+		{
+			paddleSxMove = -1;
+		}
+		else if( paddleSxY < windowConfig.height-PaddleHeightPx && MultiSpacc_CheckKey( MultiSpacc_Key_Down, 0 ) )
+		{
+			paddleSxMove = +1;
+		}
 	}
 
 	// TODO: listen for OS terminate signal
 	// TODO: fix SDL not waiting for key release with inputs checked this way
+	// TODO: proper pause menu
 	if( MultiSpacc_CheckKey( MultiSpacc_Key_Pause, 0 ) )
 	{
 		if(!paused)
@@ -144,7 +205,6 @@ bool RealUpdate( void *args, double deltaTime )
 		}
 	}
 
-	//if( !MultiSpacc_WaitUpdateDisplay( window, &nextTick ) )
 	if( !MultiSpacc_UpdateDisplay(window) )
 	{
 		MultiSpacc_PrintDebug("[E] Error Updating Screen.\n");
@@ -153,72 +213,6 @@ bool RealUpdate( void *args, double deltaTime )
 
 	return true;
 }
-
-/*
-bool MainLoop( void *args )
-{
-	MultiSpacc_WaitFrame(&nextTick);
-
-	if (!paused)
-	{
-		MultiSpacc_BlitLayer( background, screen );
-
-		MultiSpacc_SetSprite( BallSprite, ballX, ballY, BallTile, tilesImg, screen );
-
-		MultiSpacc_SetMetaSprite( PaddleSxSprite, PaddleSxX, paddleSxY, &msdata, PaddleHeight, tilesImg, screen );
-		MultiSpacc_SetMetaSprite( PaddleDxSprite, PaddleDxX, paddleDxY, &msdata, PaddleHeight, tilesImg, screen );
-
-		ballX += accelX * DeltaTime;
-		ballY += accelY * DeltaTime;
-
-		if( ballX <= 0 || ballX >= (windowConfig.width - BallSize) )
-		{
-			accelX *= -1;
-		}
-
-		if( ballY <= 0 || ballY >= (windowConfig.height - BallSize) )
-		{
-			accelY *= -1;
-		}
-
-		#define TouchingPaddleSx ( ballX <= PaddleSxX+BallSize && ballY >= paddleSxY-BallSize && ballY <= (paddleSxY + 8*PaddleHeight) )
-		#define TouchingPaddleDx ( ballX >= PaddleDxX-BallSize && ballY >= paddleDxY-BallSize && ballY <= (paddleDxY + 8*PaddleHeight) )
-		if( TouchingPaddleSx || TouchingPaddleDx )
-		{
-			accelX *= -1;
-		}
-	}
-	else
-	{
-		MultiSpacc_PrintText( "Pause", background, &windowConfig, 3, 3, tilesImg );
-	}
-
-	if( paddleSxY > 0 && MultiSpacc_CheckKey( MultiSpacc_Key_Up, 0 ) )
-	{
-		paddleSxY -= PaddleAccel * DeltaTime;
-	}
-	else if( paddleSxY < (windowConfig.height - 8*PaddleHeight) && MultiSpacc_CheckKey( MultiSpacc_Key_Down, 0 ) )
-	{
-		paddleSxY += PaddleAccel * DeltaTime;
-	}
-
-	// TODO: listen for OS terminate signal
-	if( MultiSpacc_CheckKey( MultiSpacc_Key_Pause, 0 ) )
-	{
-		if (!paused) paused = true;
-		else return false;
-	}
-
-	//if( !MultiSpacc_WaitUpdateDisplay( window, &nextTick ) )
-	if( !MultiSpacc_UpdateDisplay(window) )
-	{
-		MultiSpacc_PrintDebug("[E] Error Updating Screen.\n");
-		return false;
-	}
-
-	return true;
-}
-*/
 
 int main( int argc, char *argv[] )
 {
@@ -254,11 +248,9 @@ int main( int argc, char *argv[] )
 		return -1;
 	}
 
-	ballX = windowConfig.width/2;
-	ballY = windowConfig.height/2;
+	ResetBall();
 	paddleSxY = windowConfig.height/2 - 24;
 	paddleDxY = windowConfig.height/2 - 24;
 
-	//return MultiSpacc_SetMainLoop( MainLoop, NULL );
-	return MultiSpacc_SetMainLoop( FixedUpdate, RealUpdate, &nextTick, NULL );
+	return MultiSpacc_SetMainLoop( FixedUpdate, RealUpdate, NULL );
 }

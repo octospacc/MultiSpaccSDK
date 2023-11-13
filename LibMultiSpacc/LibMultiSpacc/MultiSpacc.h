@@ -1,7 +1,7 @@
 #ifndef _MultiSpacc_MultiSpacc_h_
 #define _MultiSpacc_MultiSpacc_h_
 
-// Fixed amount of times per second to call the FixedUpdate function
+// Amount of times per second to call the FixedUpdate function, independent from video rate and hardcoded in some places due to consoles, don't change
 #define MultiSpacc_GameTick 50
 
 #include <stdarg.h>
@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifdef MultiSpacc_Target_SDL12
@@ -108,8 +109,6 @@ typedef struct MultiSpacc_MainLoopHandlerArgs {
 	bool (*functionFixedUpdate)( void *args );
 	bool (*functionRealUpdate)( void *args, double deltaTime );
 	void *args;
-	//Uint32 *nextTick;
-	//Uint32 ticksLast;
 	Uint32 elapsedRealTime;
 	Uint32 elapsedFixedTime;
 } MultiSpacc_MainLoopHandlerArgs;
@@ -122,7 +121,7 @@ MultiSpacc_Surface *MultiSpacc_GetWindowSurface( MultiSpacc_Window *Window );
 void MultiSpacc_SetAppTitle( MultiSpacc_Window *Window, const char Title[] );
 void MultiSpacc_SetAppIcon( MultiSpacc_Window *Window, MultiSpacc_Surface *Icon );
 
-bool MultiSpacc_SetMainLoop( bool functionFixedUpdate( void *args ), bool functionRealUpdate( void *args, double deltaTime ), Uint32 *nextTick, void *args );
+bool MultiSpacc_SetMainLoop( bool functionFixedUpdate( void *args ), bool functionRealUpdate( void *args, double deltaTime ), void *args );
 
 MultiSpacc_Surface *MultiSpacc_LoadImage( char FilePath[], MultiSpacc_Surface *Screen, Uint32 *ColorKey );
 int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key );
@@ -138,7 +137,8 @@ void MultiSpacc_SetMetaSprite( int id, int x, int y, MultiSpacc_SpritesMap *map,
 MultiSpacc_Surface *MultiSpacc_CreateSurface( MultiSpacc_SurfaceConfig *surfaceConfig );
 void MultiSpacc_BlitLayer( MultiSpacc_Surface *source, MultiSpacc_Surface *destination );
 
+bool MultiSpacc_UpdateDisplay( MultiSpacc_Window *window );
+
 #include "./Keys.h"
-#include "./VideoCycle.h"
 
 #endif // _MultiSpacc_MultiSpacc_h_
