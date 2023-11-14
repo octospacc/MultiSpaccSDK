@@ -1,34 +1,34 @@
 #include "./MultiSpacc.h"
 
-void MultiSpacc_PrintText( char Text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig *surfaceConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ )
+void MultiSpacc_PrintText( char text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig *surfaceConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ )
 {
-	#ifdef MultiSpacc_Target_SDLCom
+	#if defined(MultiSpacc_Target_SDLCommon)
 		/* TODO: not just 8x8 tiles, and account for surface dimensions */
-		for( int i = 0; i < strlen(Text); i++ )
+		for( int i = 0; i < strlen(text); i++ )
 		{
-			MultiSpacc_Rect Offset = {
-				.x = (x * 8) + (8 * i),
-				.y = (y * 8),
+			MultiSpacc_Rect offset = {
+				.x = 8*x + 8*i,
+				.y = 8*y,
 			};
-			MultiSpacc_Rect Clip = {
-				.x = 8 * (Text[i] % 16),
-				.y = 8 * (Text[i] / 16),
+			MultiSpacc_Rect clip = {
+				.x = 8 * (text[i] % 16),
+				.y = 8 * (text[i] / 16),
 				.w = 8,
 				.h = 8,
 			};
-			SDL_BlitSurface( Tiles, &Clip, Surface, &Offset );
+			SDL_BlitSurface( Tiles, &clip, Surface, &offset );
 		};
-	#endif
 
-	#ifdef MultiSpacc_Target_NDS
-		iprintf( "%s", Text );
-	#endif
+	#elif defined(MultiSpacc_Target_NDS)
+		iprintf( "\x1b[%d;%dH%s", y, x, text );
 
-	#ifdef MultiSpacc_Target_NES
+	#elif defined(MultiSpacc_Target_NES)
+		// NOTE: is there no alternative to ppu off and on there? it makes the screen flicker and so makes programming more difficult
 		ppu_off();
 		vram_adr(NTADR_A( x, y ));
-		vram_write( Text, strlen(Text) );
+		vram_write( text, strlen(text) );
 		ppu_on_all();
+
 	#endif
 }
 

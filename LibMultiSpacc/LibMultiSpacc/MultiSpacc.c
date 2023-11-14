@@ -99,40 +99,66 @@ int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key )
 
 void MultiSpacc_SetSprite( int id, int x, int y, int sprite, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen )
 {
-	#if defined(MultiSpacc_Target_SDLCom)
-		MultiSpacc_Rect Offset = { .x = x, .y = y, };
-		MultiSpacc_Rect Clip = {
+	#if defined(MultiSpacc_Target_SDLCommon)
+		MultiSpacc_Rect offset = { .x = x, .y = y, };
+		MultiSpacc_Rect clip = {
 			.x = (8 * (sprite % 16)),
 			.y = (8 * (sprite / 16)),
 			.w = 8,
 			.h = 8,
 		};
-		SDL_BlitSurface( tiles, &Clip, screen, &Offset );
+		SDL_BlitSurface( tiles, &clip, screen, &offset );
+
 	#elif defined(MultiSpacc_Target_NES)
 		oam_spr( x, y, sprite, 0, id*4 );
+
 	#endif
 }
 
 void MultiSpacc_SetMetaSprite( int id, int x, int y, MultiSpacc_SpritesMap *map, int mapSize, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen )
 {
 	int i;
-
 	for(i=0; i<mapSize; i++)
 	{
 		MultiSpacc_SetSprite( (id + i), (x + map->x[i]), (y + map->y[i]), map->chr[i], tiles, screen );
 	}
 }
 
+void MultiSpacc_SetTile( int x, int y, int tile, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen )
+{
+	#if defined(MultiSpacc_Target_SDLCommon)
+		MultiSpacc_Rect offset = {
+			.x = 8*x,
+			.y = 8*y,
+		};
+		MultiSpacc_Rect clip = {
+			.x = (8 * (tile % 16)),
+			.y = (8 * (tile / 16)),
+			.w = 8,
+			.h = 8,
+		};
+		SDL_BlitSurface( tiles, &clip, screen, &offset );
+
+	#elif defined(MultiSpacc_Target_NES)
+		// NOTE: is there no alternative to ppu off and on there? it makes the screen flicker and so makes programming more difficult
+		ppu_off();
+		vram_adr(NTADR_A( x, y ));
+		vram_put(tile);
+		ppu_on_all();
+
+	#endif
+}
+
 void MultiSpacc_BlitLayer( MultiSpacc_Surface *source, MultiSpacc_Surface *destination )
 {
-	#if defined(MultiSpacc_Target_SDLCom)
+	#if defined(MultiSpacc_Target_SDLCommon)
 		SDL_BlitSurface( source, NULL, destination, NULL );
 	#endif
 }
 
 MultiSpacc_Surface *MultiSpacc_CreateSurface( MultiSpacc_SurfaceConfig *surfaceConfig )
 {
-	#if defined(MultiSpacc_Target_SDLCom)
+	#if defined(MultiSpacc_Target_SDLCommon)
 		return SDL_CreateRGBSurface( 0, surfaceConfig->width, surfaceConfig->height, surfaceConfig->bits, 0, 0, 0, 0 );
 	#endif
 }
@@ -164,15 +190,15 @@ bool MultiSpacc_MainLoopHandler( MultiSpacc_MainLoopHandlerArgs *handlerArgs )
 			return false;
 		}
 
-	#elif defined(MultiSpacc_Target_NES)
-		ppu_wait_frame();
+	#elif defined(MultiSpacc_Target_NDS)
+		// TODO: limit FixedUpdate to 50 FPS, since NDS vblank is 60 Hz
+		swiWaitForVBlank();
 		if( AssertDirectCallUpdates ){
 			return false;
 		}
 
-	#elif defined(MultiSpacc_Target_NDS)
-		// TODO: limit FixedUpdate to 50 FPS, since NDS vblank is 60 Hz
-		swiWaitForVBlank();
+	#elif defined(MultiSpacc_Target_NES)
+		ppu_wait_frame();
 		if( AssertDirectCallUpdates ){
 			return false;
 		}

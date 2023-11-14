@@ -24,11 +24,19 @@ bool MultiSpacc_SetMainLoop( bool functionFixedUpdate( void *args ), bool functi
 
 MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig *windowConfig )
 {
-	#if defined(MultiSpacc_Target_SDL12)
-		return SDL_SetVideoMode( windowConfig->width, windowConfig->height, windowConfig->bits, windowConfig->flags );
-
-	#elif defined(MultiSpacc_Target_SDL20)
-		return SDL_CreateWindow( NULL, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, windowConfig->width, windowConfig->height, windowConfig->flags );
+	#if defined(MultiSpacc_Target_SDLCommon)
+		if( windowConfig->width <= 0 || windowConfig->height <= 0 ){
+			windowConfig->width = 512;
+			windowConfig->height = 480;
+		}
+		if( windowConfig->bits <= 0 ){
+			windowConfig->bits = 24;
+		}
+		#if defined(MultiSpacc_Target_SDL12)
+			return SDL_SetVideoMode( windowConfig->width, windowConfig->height, windowConfig->bits, windowConfig->flags );
+		#elif defined(MultiSpacc_Target_SDL20)
+			return SDL_CreateWindow( NULL, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, windowConfig->width, windowConfig->height, windowConfig->flags );
+		#endif
 
 	#elif defined(MultiSpacc_Target_NDS)
 		PrintConsole *bottomScreen = NULL;

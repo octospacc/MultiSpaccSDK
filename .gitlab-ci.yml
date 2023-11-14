@@ -1,41 +1,11 @@
 image: debian:latest
 
 before_script: |
-  apt update
-  apt install -y \
-    make gcc mingw-w64 wine cc65 emscripten curl wget p7zip-full python3 python3-pil \
-    libsdl1.2-dev libsdl-image1.2-dev libsdl-ttf2.0-dev libsdl-mixer1.2-dev \
-    libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-mixer-dev \
-  ;
-  curl -o ./mingw32.7z https://hlb0.octt.eu.org/Drive/Misc/mingw32-9.2.0.7z.sfx.exe
-  7z x ./mingw32.7z
-  cp ./mingw32/bin/*.dll ./mingw32/libexec/gcc/mingw32/9.2.0/
-  mkdir -p /opt/Sdk
-  mv ./mingw32 /opt/Sdk/mingw32
-  curl https://apt.devkitpro.org/install-devkitpro-pacman | bash
-  dkp-pacman -Sy nds-dev
+  sh ./Tools/InstallBuildEnvironment.sh
 
 Tests:
   stage: build
   script: |
-    cd ./LibMultiSpacc/Examples
-    for Example in */
-    do
-      cd ${Example}
-      for Build in \
-        "Target=LinuxPC MultiSpacc_Target=SDL12"
-        "Target=LinuxPC MultiSpacc_Target=SDL20"
-        "Target=WindowsPC MultiSpacc_Target=SDL12"
-        "Target=WindowsPC MultiSpacc_Target=SDL20"
-        "Target=Windows9x"
-        "Target=Web"
-        "Target=NDS"
-        "Target=NES"
-      ; do
-        make clean
-        make -j$(nproc --all) ${Build}
-      done
-      cd ..
-    done
+    make -j($nproc --all)
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
