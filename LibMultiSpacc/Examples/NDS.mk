@@ -19,7 +19,7 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	$(shell basename $(abspath $(CURDIR)/../..))
 BUILD		:=	build
-SOURCES		:=	gfx source data source/LibMultiSpacc source/LibMultiSpacc/NDS
+SOURCES		:=	gfx source data
 INCLUDES	:=	include build
 
 #---------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ CFLAGS	:=	-g -Wall -O2\
 			-ffast-math \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM9 -DMultiSpacc_Target_NDS
+CFLAGS	+=	$(INCLUDE) -DARM9 $(MultiSpacc_Defines)
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)

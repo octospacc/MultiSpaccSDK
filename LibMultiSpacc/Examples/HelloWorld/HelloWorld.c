@@ -81,6 +81,9 @@ int main( int argc, char *argv[] )
 	windowConfig.bits = 16;
 	memcpy( windowConfig.palette, palette, 32 );
 
+	//romfsInit();
+	//chdir("romfs:/.dummy");
+
 	margs.window = MultiSpacc_SetWindow( &windowConfig );
 	margs.screen = MultiSpacc_GetWindowSurface( margs.window );
 	margs.background = MultiSpacc_CreateSurface( &windowConfig );

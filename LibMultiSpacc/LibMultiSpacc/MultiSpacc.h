@@ -1,6 +1,10 @@
 #ifndef _MultiSpacc_MultiSpacc_h_
 #define _MultiSpacc_MultiSpacc_h_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Amount of times per second to call the FixedUpdate function, independent from video rate and hardcoded in some places due to consoles, don't change
 #define MultiSpacc_GameTick 50
 
@@ -40,7 +44,7 @@
 	} MultiSpacc_Event;
 #endif
 
-#ifdef MultiSpacc_Target_SDLCom
+#ifdef MultiSpacc_Target_SDLCommon
 	#define MultiSpacc_Init SDL_Init
 	#define MultiSpacc_Surface SDL_Surface
 	#define MultiSpacc_GetTicks SDL_GetTicks
@@ -48,6 +52,11 @@
 
 #ifdef MultiSpacc_Target_Web
 	#include <emscripten.h>
+#endif
+
+#ifdef MultiSpacc_Target_Switch
+	#include <switch.h>
+	#include <unistd.h>
 #endif
 
 #ifdef MultiSpacc_Target_NDS
@@ -98,12 +107,12 @@ typedef struct MultiSpacc_SurfaceConfig {
 	Uint32 flags;
 } MultiSpacc_SurfaceConfig;
 
-typedef struct MultiSpacc_SpritesMap {
+typedef struct {
 	int *chr;
 	int *x;
 	int *y;
 	int *flags;	
-} MultiSpacc_SpritesMap;
+} MultiSpacc_SpritesMap, MultiSpacc_TilesMap;
 
 typedef struct MultiSpacc_MainLoopHandlerArgs {
 	bool (*functionFixedUpdate)( void *args );
@@ -143,5 +152,9 @@ void MultiSpacc_BlitLayer( MultiSpacc_Surface *source, MultiSpacc_Surface *desti
 bool MultiSpacc_UpdateDisplay( MultiSpacc_Window *window );
 
 #include "./Keys.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _MultiSpacc_MultiSpacc_h_

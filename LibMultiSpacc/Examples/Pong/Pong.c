@@ -26,6 +26,9 @@ MultiSpacc_Surface *screen;
 MultiSpacc_Surface *background;
 MultiSpacc_Surface *tilesImg;
 
+MultiSpacc_SpritesMap paddleSpriteMap;
+MultiSpacc_TilesMap divisorTileMap, borderTileMap;
+
 #define BallSize 8
 #define PaddleWidth 8
 #define PaddleHeightTl 4
@@ -61,8 +64,6 @@ const char palette[32] = {
 	0x0d,0x2d,0x3a,0x00, // sprite 2
 	0x0d,0x27,0x2a,      // sprite 3
 };
-
-MultiSpacc_SpritesMap msdata;
 
 void ResetBall(void)
 {
@@ -215,8 +216,8 @@ bool RealUpdate( void *args, double deltaTime )
 		#define PaddleAccelDelta PaddleAccel*deltaTime
 		#define PaddleSxYDisplay (paddleSxY + paddleSxMove*PaddleAccelDelta)
 		#define PaddleDxYDisplay (paddleDxY + paddleDxMove*PaddleAccelDelta)
-		MultiSpacc_SetMetaSprite( PaddleSxSprite, PaddleSxX, PaddleSxYDisplay, &msdata, PaddleHeightTl, tilesImg, screen );
-		MultiSpacc_SetMetaSprite( PaddleDxSprite, PaddleDxX, PaddleDxYDisplay, &msdata, PaddleHeightTl, tilesImg, screen );
+		MultiSpacc_SetMetaSprite( PaddleSxSprite, PaddleSxX, PaddleSxYDisplay, &paddleSpriteMap, PaddleHeightTl, tilesImg, screen );
+		MultiSpacc_SetMetaSprite( PaddleDxSprite, PaddleDxX, PaddleDxYDisplay, &paddleSpriteMap, PaddleHeightTl, tilesImg, screen );
 
 		//RefreshScore():
 		//itoa(scoreSx, scoreChar, 10);
@@ -255,12 +256,14 @@ bool RealUpdate( void *args, double deltaTime )
 
 int main( int argc, char *argv[] )
 {
-	int   chr[] = { PaddleTile, PaddleTile, PaddleTile, PaddleTile };
-	int     x[] = { 0, 0,  0,  0 };
-	int     y[] = { 0, 8, 16, 24 };
-	msdata.chr = chr;
-	msdata.x = x;
-	msdata.y = y;
+	int i;
+	int chr[] = { PaddleTile, PaddleTile, PaddleTile, PaddleTile };
+	int   x[] = { 0, 0,  0,  0 };
+	int   y[] = { 0, 8, 16, 24 };
+
+	paddleSpriteMap.chr = chr;
+	paddleSpriteMap.x = x;
+	paddleSpriteMap.y = y;
 
 	windowConfig.width = 320;
 	windowConfig.height = 240;
@@ -285,6 +288,23 @@ int main( int argc, char *argv[] )
 	if( tilesImg == NULL )
 	{
 		return -1;
+	}
+
+	// divisorTileMap.chr = malloc(windowConfig.height/8 * sizeof(int*));
+	// divisorTileMap.x = malloc(windowConfig.height/8 * sizeof(int*));
+	// divisorTileMap.y = malloc(windowConfig.height/8 * sizeof(int*));
+	// borderTileMap.chr = malloc(windowConfig.height/8 * sizeof(int*));
+	// borderTileMap.x = malloc(windowConfig.height/8 * sizeof(int*));
+	// borderTileMap.y = malloc(windowConfig.height/8 * sizeof(int*));
+
+	for( i=0; i<windowConfig.height/8; i++ )
+	{
+		//divisorTileMap.chr[i] = DivisorTile;
+		// divisorTileMap.x[i] = windowConfig.width/2;
+		// divisorTileMap.y[i] = 0;
+		// borderTileMap.chr[i] = BorderTile;
+		// borderTileMap.x[i] = 0;
+		// borderTileMap.y[i] = 8;
 	}
 
 	DisplayBorders();

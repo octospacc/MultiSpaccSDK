@@ -1,40 +1,58 @@
 #ifndef _MultiSpacc_Keys_h_
 #define _MultiSpacc_Keys_h_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// Action1
 #if defined(MultiSpacc_Target_NES)
 	#define MultiSpacc_Key_Action1 PAD_A
 #endif
 
+// Action2
 #if defined(MultiSpacc_Target_NES)
 	#define MultiSpacc_Key_Action2 PAD_B
 #endif
 
+// Confirm
 #if defined(MultiSpacc_Target_NES)
 	#define MultiSpacc_Key_Confirm PAD_A
 #endif
 
+// Cancel
 #if defined(MultiSpacc_Target_NES)
 	#define MultiSpacc_Key_Cancel PAD_B
 #endif
 
+// Start
 #if defined(MultiSpacc_Target_NES)
 	#define MultiSpacc_Key_Start PAD_START
 #endif
 
+// Pause
 #if defined(MultiSpacc_Target_SDLCommon) && (defined(MultiSpacc_Target_PC) || defined(MultiSpacc_Target_Web))
 	// #define MultiSpacc_Key_Pause SDLK_ESCAPE
 	#define MultiSpacc_Key_Pause SDL_SCANCODE_ESCAPE
+#elif defined(MultiSpacc_Target_SDLCommon) && defined(MultiSpacc_Target_Switch)
+	#define MultiSpacc_Key_Pause 10
+#elif defined(MultiSpacc_Target_NDS)
+	#define MultiSpacc_Key_Pause KEY_START
 #elif defined(MultiSpacc_Target_NES)
 	#define MultiSpacc_Key_Pause PAD_START
 #endif
 
+// Select
 #if defined(MultiSpacc_Target_SDLCommon) && (defined(MultiSpacc_Target_PC) || defined(MultiSpacc_Target_Web))
 	// #define MultiSpacc_Key_Select SDLK_TAB
 	#define MultiSpacc_Key_Select SDL_SCANCODE_TAB
+#elif defined(MultiSpacc_Target_NDS)
+	#define MultiSpacc_Key_Select KEY_SELECT
 #elif defined(MultiSpacc_Target_NES)
 	#define MultiSpacc_Key_Select PAD_SELECT
 #endif
 
+// Directions
 #if defined(MultiSpacc_Target_SDLCommon) && (defined(MultiSpacc_Target_PC) || defined(MultiSpacc_Target_Web))
 	// #define MultiSpacc_Key_Up    SDLK_UP
 	// #define MultiSpacc_Key_Down  SDLK_DOWN
@@ -61,5 +79,9 @@
 #endif
 
 bool MultiSpacc_CheckKey( int key, char pad );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _MultiSpacc_Keys_h_

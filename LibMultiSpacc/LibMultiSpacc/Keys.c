@@ -2,7 +2,7 @@
 
 bool MultiSpacc_CheckKey( int key, char pad )
 {
-	#if defined(MultiSpacc_Target_SDLCom)
+	#if defined(MultiSpacc_Target_SDLCommon)
 		#if defined(MultiSpacc_Target_SDL12)
 			Uint8 *keys = SDL_GetKeyState(NULL);
 		#elif defined(MultiSpacc_Target_SDL20)
@@ -20,6 +20,11 @@ bool MultiSpacc_CheckKey( int key, char pad )
 			// }
 		// }
 		// return false;
+	#elif defined(MultiSpacc_Target_NDS)
+		int keys;
+		scanKeys();
+		keys = keysDown();
+		return ( keys & key );
 	#elif defined(MultiSpacc_Target_NES)
 		return ( pad_poll(pad) & key );
 	#endif
