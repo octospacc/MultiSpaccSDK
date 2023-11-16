@@ -1,9 +1,9 @@
 #!/bin/sh
 
-[ "$(whoami)" != root ] && {
-	echo "This script must run as root".
-	exit -1
-}
+#[ "$(whoami)" != root ] && {
+#	echo "This script must run as root".
+#	exit -1
+#}
 
 mkdir -p /tmp /opt/Sdk
 
