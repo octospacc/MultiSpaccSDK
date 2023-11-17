@@ -5,6 +5,19 @@
 extern "C" {
 #endif
 
+#if defined(MultiSpacc_Target_Switch) && defined(MultiSpacc_Target_SDLCommon)
+	#define JOY_A     0
+	#define JOY_B     1
+	#define JOY_X     2
+	#define JOY_Y     3
+	#define JOY_PLUS  10
+	#define JOY_MINUS 11
+	#define JOY_LEFT  12
+	#define JOY_UP    13
+	#define JOY_RIGHT 14
+	#define JOY_DOWN  15
+#endif
+
 // Action1
 #if defined(MultiSpacc_Target_NES)
 	#define MultiSpacc_Key_Action1 PAD_A
@@ -32,10 +45,10 @@ extern "C" {
 
 // Pause
 #if defined(MultiSpacc_Target_SDLCommon) && (defined(MultiSpacc_Target_PC) || defined(MultiSpacc_Target_Web))
-	// #define MultiSpacc_Key_Pause SDLK_ESCAPE
+	//#define MultiSpacc_Key_Pause SDLK_ESCAPE
 	#define MultiSpacc_Key_Pause SDL_SCANCODE_ESCAPE
 #elif defined(MultiSpacc_Target_SDLCommon) && defined(MultiSpacc_Target_Switch)
-	#define MultiSpacc_Key_Pause 10
+	#define MultiSpacc_Key_Pause JOY_PLUS
 #elif defined(MultiSpacc_Target_NDS)
 	#define MultiSpacc_Key_Pause KEY_START
 #elif defined(MultiSpacc_Target_NES)

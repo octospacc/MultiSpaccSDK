@@ -1,5 +1,5 @@
 AppName = $(notdir $(CURDIR))
-AppAssets = ../CHARS.png
+AppAssets = ../CHARS.xcf
 AppSources = $(wildcard *.c)
 AppHeaders = $(wildcard *.h)
 SpaccSources = $(wildcard ../../LibMultiSpacc/*.c)
@@ -40,12 +40,13 @@ else ifeq ($(Target), WindowsPC)
 
 else ifeq ($(Target), Windows9x)
 	ExeSuffix = .exe
-	Defines += -DTarget_Windows9x -DMultiSpacc_Target_PC -DMultiSpacc_Target_Windows
+	Defines += -DTarget_Windows9x -DMultiSpacc_Target_Windows9x -DMultiSpacc_Target_PC -DMultiSpacc_Target_Windows
 	MultiSpacc_Target = SDL12
 	LdFlags += -lmingw32 -static-libgcc
 	ifeq ($(Host), Windows)
 		ToolsSyspath = /c/Files/Sdk/mingw32/bin
-		export PATH=$$PATH:$(ToolsSyspath)
+		# TODO: Find a workaround to the path hardcoding here
+		export PATH=/usr/bin:/c/Files/Applications:$(ToolsSyspath)
 	else
 		ToolsSyspath = /opt/Sdk/mingw32/bin
 		ToolsWrapper = wine
@@ -75,24 +76,28 @@ else ifeq ($(Target), NES)
 
 endif
 
+ConstSdlDefines = -DMultiSpacc_Target_SDLCom -DMultiSpacc_Target_SDLCommon -DMultiSpacc_Backend_SDLCommon
+ConstSdl12Defines = $(ConstSdlDefines) -DMultiSpacc_Target_SDL12 -DMultiSpacc_Backend_SDL12
+ConstSdl20Defines = $(ConstSdlDefines) -DMultiSpacc_Target_SDL20 -DMultiSpacc_Backend_SDL20
+
 ifeq ($(MultiSpacc_Target), SDL12)
-	Defines += -DMultiSpacc_Target_SDL12 -DMultiSpacc_Target_SDLCom -DMultiSpacc_Target_SDLCommon -DMultiSpacc_Target_SDLStandard
+	Defines +=  $(ConstSdl12Defines) -DMultiSpacc_Target_SDLStandard
 	CFlags += $(shell sdl-config --cflags)
 	LdFlags += $(shell sdl-config --libs) -lSDLmain -lSDL -lSDL_image -lSDL_mixer -lSDL_ttf
 
 else ifeq ($(MultiSpacc_Target), SDL20)
-	Defines += -DMultiSpacc_Target_SDL20 -DMultiSpacc_Target_SDLCom -DMultiSpacc_Target_SDLCommon -DMultiSpacc_Target_SDLStandard
+	Defines += $(ConstSdl20Defines) -DMultiSpacc_Target_SDLStandard
 	CFlags += $(shell sdl2-config --cflags)
 	LdFlags += $(shell sdl2-config --libs) -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
 
 else ifeq ($(MultiSpacc_Target), Web)
-	Defines += -DMultiSpacc_Target_Web -DMultiSpacc_Target_SDL20 -DMultiSpacc_Target_SDLCom -DMultiSpacc_Target_SDLCommon -DMultiSpacc_Target_SDLWeb
+	Defines += -DMultiSpacc_Target_Web $(ConstSdl20Defines) -DMultiSpacc_Target_SDLWeb
 	LdFlags += -sWASM=1 -sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sSDL2_IMAGE_FORMATS='["png"]' -sUSE_SDL_TTF=2 -sUSE_SDL_MIXER=2
 	BuildProcess = Web
 
 else ifeq ($(MultiSpacc_Target), Switch)
 	ExeSuffix = .nro
-	Defines += -DMultiSpacc_Target_Switch -DMultiSpacc_Target_SDL20 -DMultiSpacc_Target_SDLCom -DMultiSpacc_Target_SDLCommon
+	Defines += -DMultiSpacc_Target_Switch $(ConstSdl20Defines)
 	Libs += -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf -lpng -ljpeg -lwebp -lm -lz -lminizip -lbz2
 	BuildProcess = Switch
 
@@ -146,39 +151,55 @@ define PrepareTargetBuildDir
 	for i in $(BuildDirSources)/*.c $(BuildDirSources)/*.h; do sed -i 's|#include[ \t]"./|#include "LibMultiSpacc_|g' $$i; done
 endef
 
+# For C++ build systems, main() must be in a .cpp file, to be compiled by the CXX
 define TargetBuildAppToCpp
-	#mv $(BuildDirSources)/$(AppName).c $(BuildDirSources)/$(AppName).cpp
 	$(shell mv $(BuildDirSources)/MultiSpacc_* $(BuildDirSources)/.tmp/)
 	for File in $(BuildDirSources)/*.c; do mv $${File} $${File}pp; done
 	$(shell mv $(BuildDirSources)/.tmp/* $(BuildDirSources)/)
 endef
 
-All all: __$(BuildProcess)__
+All all: __Assets__ __$(BuildProcess)__
+
+__Assets__:
+	mkdir -p ./Build/Assets
+	for SrcFile in $(AppAssets); \
+	do \
+		SrcExt="$${SrcFile##*.}"; \
+		DstName="$${SrcFile##*/}"; \
+		DstName="$${DstName%.*}"; \
+		if [ "$${SrcExt}" = xcf ]; then \
+			magick convert "$${SrcFile}" "./Build/Assets/$${DstName}.png"; \
+			mv "./Build/Assets/$${DstName}-0.png" "./Build/Assets/$${DstName}.4.png"; \
+			mv "./Build/Assets/$${DstName}-1.png" "./Build/Assets/$${DstName}.png"; \
+		fi; \
+	done
 
 # TODO: use virtual build dirs even for normals to allow linking against different libraries without recleaning
+# TODO: copy required DLLs on PC for Dist
 __Normal__: $(BuildObjects)
 	$(CC) $^ $(LdFlags) $(Libs) -o $(AppName)$(ExeSuffix)
-	# TODO: copy required DLLs on PC for Dist
 
+# TODO: bundle JS, WASM, and assets package in HTML file for Dist
+# TODO: remove asset hardcoding from here
 __Web__:
 	mkdir -p $(BuildDir)
 	emcc $(BuildSources) $(CFlags) $(Defines) $(LdFlags) --preload-file $(AppAssets)@CHARS.png -o $(BuildDir)/Emscripten.js
 	cp ../Emscripten.html $(BuildDir)/$(AppName).html
-	# TODO: bundle JS, WASM, and assets package in HTML file for Dist
 
 __Switch__:
 	$(eval BuildDirSources = $(BuildDir)/source)
 	$(PrepareTargetBuildDir)
 	$(TargetBuildAppToCpp)
-	mkdir -p $(BuildDir)/romfs/.dummy
-	touch $(BuildDir)/romfs/.dummy/.dummy
-	cp $(AppAssets) $(BuildDir)/romfs/
-	cd $(BuildDir); make
+	#mkdir -p $(BuildDir)/romfs/.dummy
+	#touch $(BuildDir)/romfs/.dummy/.dummy
+	mkdir -p $(BuildDir)/romfs
+	cp -r ./Build/Assets $(BuildDir)/romfs/Assets
+	cd $(BuildDir); make -j$$(nproc --all)
 
 __3DS__ __NDS__:
 	$(eval BuildDirSources = $(BuildDir)/source)
 	$(PrepareTargetBuildDir)
-	cd $(BuildDir); make
+	cd $(BuildDir); make -j$$(nproc --all)
 
 __NES__: __neslib__
 	$(eval BuildDirSources = $(BuildDir))
@@ -190,10 +211,10 @@ __NES__: __neslib__
 	cd $(BuildDir); sh ./Make.sh
 
 __neslib__:
-	cd ../../neslib; make
+	cd ../../neslib; make -j$$(nproc --all)
 
 Run run: All
-	$(OutLauncher) $(BuildDir)/$(AppName)$(ExeSuffix)
+	cd ./Build; $(OutLauncher) ../$(BuildDir)/$(AppName)$(ExeSuffix); cd ..
 
 Clean clean Clear clear:
 	find -L . -name "*.o" -type f -delete

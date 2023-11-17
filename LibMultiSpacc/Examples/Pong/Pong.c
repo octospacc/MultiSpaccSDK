@@ -284,7 +284,7 @@ int main( int argc, char *argv[] )
 
 	// Bitmap font forked from: <https://github.com/nesdoug/01_Hello/blob/master/Alpha.chr>
 	// Original copyright (c) 2018 Doug Fraker www.nesdoug.com (MIT)
-	tilesImg = MultiSpacc_LoadImage( "../CHARS.png", screen, NULL );
+	tilesImg = MultiSpacc_LoadImage( "./Assets/CHARS.png", screen, NULL );
 	if( tilesImg == NULL )
 	{
 		return -1;

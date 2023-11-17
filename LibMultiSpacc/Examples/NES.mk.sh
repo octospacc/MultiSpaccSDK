@@ -1,10 +1,16 @@
 #!/dev/null
 set -e
 SdkRoot="${ProjectRoot}/../../.."
+BuildDir="$(pwd)"
 
-# TODO: multiple files
-for File in ${AppAssets}
-do sh "${SdkRoot}/Tools/python3.sh" "${SdkRoot}/Tools/pilbmp2nes.py" -i "${ProjectRoot}/${File}" -o ./CHARS.chr
+for SrcFile in ../Assets/*.4.png
+do
+	SrcExt="${SrcFile##*.}"
+	DstName="${SrcFile##*/}"
+	DstName="${DstName%%.*}"
+	if [ "${SrcExt}" = png ]
+		then sh "${SdkRoot}/Tools/python3.sh" "${SdkRoot}/Tools/pilbmp2nes.py" -i "${SrcFile}" -o "./${DstName}.chr"
+	fi
 done
 
 for File in *.c

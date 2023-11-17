@@ -18,4 +18,12 @@ All all:
 	cd ..; \
 	done
 
-.PHONY: All all
+Clean clean Clear clear:
+	for Example in */; \
+	do \
+		cd $${Example}; \
+		make clean; \
+	cd ..; \
+	done
+
+.PHONY: All all Clean clean Clear clear

@@ -4,7 +4,9 @@ bool MultiSpacc_CheckKey( int key, char pad )
 {
 	#if defined(MultiSpacc_Target_SDLCommon)
 		#if defined(MultiSpacc_Target_SDL12)
-			Uint8 *keys = SDL_GetKeyState(NULL);
+			Uint8 *keys;
+			SDL_PumpEvents();
+			keys = SDL_GetKeyState(NULL);
 		#elif defined(MultiSpacc_Target_SDL20)
 			const Uint8 *keys;
 			SDL_PumpEvents();

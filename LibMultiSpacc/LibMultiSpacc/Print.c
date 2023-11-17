@@ -34,10 +34,14 @@ void MultiSpacc_PrintText( char text[], MultiSpacc_Surface *Surface, MultiSpacc_
 
 void MultiSpacc_PrintDebug( const char *format, ... )
 {
-	#ifdef MultiSpacc_Target_SDLCom
+	#if defined(MultiSpacc_Target_SDLCommon)
 		va_list args;
 		va_start( args, format );
-		SDL_Log( format, args );
+		#if defined(MultiSpacc_Target_SDL12)
+			sprintf( (char*)stderr, format, args );
+		#elif defined(MultiSpacc_Target_SDL20)
+			SDL_Log( format, args );
+		#endif
 		va_end(args);
 	#endif
 }

@@ -30,7 +30,7 @@ MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig *windowConfig 
 			windowConfig->height = 480;
 		}
 		if( windowConfig->bits <= 0 ){
-			windowConfig->bits = 24;
+			windowConfig->bits = 32;
 		}
 
 		#if defined(MultiSpacc_Target_SDL12)
