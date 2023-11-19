@@ -107,11 +107,16 @@ typedef struct MultiSpacc_SurfaceConfig {
 	Uint32 flags;
 } MultiSpacc_SurfaceConfig;
 
+typedef struct MultiSpacc_SpriteFlags {
+	bool flipHorizontal;
+	bool flipVertical;
+} MultiSpacc_SpriteFlags;
+
 typedef struct {
 	int *chr;
 	int *x;
 	int *y;
-	int *flags;	
+	MultiSpacc_SpriteFlags *flags;	
 } MultiSpacc_SpritesMap, MultiSpacc_TilesMap;
 
 typedef struct MultiSpacc_MainLoopHandlerArgs {
@@ -140,11 +145,11 @@ int MultiSpacc_PollEvent( MultiSpacc_Event *Event );
 void MultiSpacc_PrintText( char text[], MultiSpacc_Surface *Surface, MultiSpacc_SurfaceConfig *surfaceConfig, int x, int y, MultiSpacc_Surface *Tiles /*, int FontSize, int Color */ ); // WIP
 void MultiSpacc_PrintDebug( const char *format, ... );
 
-void MultiSpacc_SetSprite( int id, int x, int y, int sprite, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen );
+void MultiSpacc_SetSprite( int id, int x, int y, int sprite, MultiSpacc_SpriteFlags *flags, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen );
 void MultiSpacc_SetMetaSprite( int id, int x, int y, MultiSpacc_SpritesMap *map, int mapSize, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen );
 
 void MultiSpacc_SetTile( int x, int y, int tile, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen );
-// void MultiSpacc_SetMetaTile(  );
+void MultiSpacc_SetMetaTile( int x, int y, MultiSpacc_TilesMap *map, int mapSize, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen );
 
 MultiSpacc_Surface *MultiSpacc_CreateSurface( MultiSpacc_SurfaceConfig *surfaceConfig );
 void MultiSpacc_BlitLayer( MultiSpacc_Surface *source, MultiSpacc_Surface *destination );

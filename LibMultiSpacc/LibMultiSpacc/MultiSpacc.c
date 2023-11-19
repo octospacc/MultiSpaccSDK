@@ -97,7 +97,7 @@ int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key )
 	}
 #endif
 
-void MultiSpacc_SetSprite( int id, int x, int y, int sprite, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen )
+void MultiSpacc_SetSprite( int id, int x, int y, int sprite, MultiSpacc_SpriteFlags *flags, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen )
 {
 	#if defined(MultiSpacc_Target_SDLCommon)
 		MultiSpacc_Rect offset = { .x = x, .y = y, };
@@ -110,7 +110,7 @@ void MultiSpacc_SetSprite( int id, int x, int y, int sprite, MultiSpacc_Surface 
 		SDL_BlitSurface( tiles, &clip, screen, &offset );
 
 	#elif defined(MultiSpacc_Target_NES)
-		oam_spr( x, y, sprite, 0, id*4 );
+		oam_spr( x, y, sprite, (flags == NULL ? 0 : 0|(flags->flipHorizontal ? OAM_FLIP_H : 0)|(flags->flipVertical ? OAM_FLIP_V : 0)), id*4 );
 
 	#endif
 }
@@ -120,7 +120,7 @@ void MultiSpacc_SetMetaSprite( int id, int x, int y, MultiSpacc_SpritesMap *map,
 	int i;
 	for(i=0; i<mapSize; i++)
 	{
-		MultiSpacc_SetSprite( (id + i), (x + map->x[i]), (y + map->y[i]), map->chr[i], tiles, screen );
+		MultiSpacc_SetSprite( (id + i), (x + map->x[i]), (y + map->y[i]), map->chr[i], &map->flags[i], tiles, screen );
 	}
 }
 
@@ -140,12 +140,34 @@ void MultiSpacc_SetTile( int x, int y, int tile, MultiSpacc_Surface *tiles, Mult
 		SDL_BlitSurface( tiles, &clip, screen, &offset );
 
 	#elif defined(MultiSpacc_Target_NES)
-		// NOTE: is there no alternative to ppu off and on there? it makes the screen flicker and so makes programming more difficult
 		ppu_off();
 		vram_adr(NTADR_A( x, y ));
 		vram_put(tile);
 		ppu_on_all();
 
+	#endif
+}
+
+void MultiSpacc_SetMetaTile( int x, int y, MultiSpacc_TilesMap *map, int mapSize, MultiSpacc_Surface *tiles, MultiSpacc_Surface *screen )
+{
+	int i;
+
+	#if defined(MultiSpacc_Target_NES)
+		ppu_off();
+	#endif
+
+	for(i=0; i<mapSize; i++)
+	{
+		#if defined(MultiSpacc_Target_NES)
+			vram_adr(NTADR_A( (x + map->x[i]), (y + map->y[i]) ));
+			vram_put( map->chr[i] );
+		#else
+			MultiSpacc_SetTile( (x + map->x[i]), (y + map->y[i]), map->chr[i], tiles, screen );
+		#endif
+	}
+
+	#if defined(MultiSpacc_Target_NES)
+		ppu_on_all();
 	#endif
 }
 

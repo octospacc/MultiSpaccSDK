@@ -6,6 +6,7 @@ before_script: |
 Tests:
   stage: build
   script: |
-    make -j($nproc --all)
+    . .env
+    make -j$(nproc --all)
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH

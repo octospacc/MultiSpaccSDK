@@ -13,22 +13,20 @@ typedef struct MainArgs {
 	MultiSpacc_Surface *background;
 	//MultiSpacc_Surface *Foreground;
 	MultiSpacc_Surface *tilesImg;
+	MultiSpacc_KeysStates *buttonsStates;
 } MainArgs;
 
-/*{pal:"nes",layout:"nes"}*/
 const char palette[32] = { 
 	0x0F,                // screen
 	0x11,0x02,0x02,0x00, // background 0
 	0x00,0x00,0x00,0x00, // background 1
 	0x00,0x00,0x00,0x00, // background 2
 	0x00,0x00,0x00,0x00, // background 3
-	0x16,0x00,0x00,0x00, // sprite 0
+	0x28,0x00,0x00,0x00, // sprite 0
 	0x00,0x00,0x00,0x00, // sprite 1
 	0x00,0x00,0x00,0x00, // sprite 2
 	0x00,0x00,0x00,      // sprite 3
 };
-
-Uint32 nextTick;
 
 bool MainLoop( void *args )
 {
@@ -37,7 +35,7 @@ bool MainLoop( void *args )
 	//SDL_FillRect(margs->background, NULL, 0x00F);
 	MultiSpacc_BlitLayer( margs->background, margs->screen );
 	//SDL_BlitSurface( margs->Foreground, &rect, margs->Screen, &rect );
-	MultiSpacc_SetSprite( 0, margs->spriteX, margs->spriteY, 1, margs->tilesImg, margs->screen );
+	MultiSpacc_SetSprite( 0, margs->spriteX, margs->spriteY, 1, NULL, margs->tilesImg, margs->screen );
 	//scroll(spriteX,0);
 
 	margs->spriteX += margs->accelX;
@@ -52,8 +50,10 @@ bool MainLoop( void *args )
 		margs->accelY *= -1;
 	}
 
+	MultiSpacc_PollButtons( 0, margs->buttonsStates );
+
 	/* TODO: listen for OS terminate signal */
-	if( MultiSpacc_CheckKey( MultiSpacc_Key_Pause, 0 ) )
+	if( MultiSpacc_CheckKeyPress( MultiSpacc_Key_Pause, margs->buttonsStates ) )
 	{
 		return false;
 	}
@@ -77,14 +77,15 @@ int main( int argc, char *argv[] )
 {
 	MainArgs margs = {0};
 	MultiSpacc_SurfaceConfig windowConfig = {0};
+	MultiSpacc_KeysStates buttonsStates = {0};
 
 	margs.windowConfig = &windowConfig;
+	margs.buttonsStates = &buttonsStates;
 	margs.accelX = +2;
 	margs.accelY = +2;
 
 	windowConfig.width = 320;
 	windowConfig.height = 240;
-	//windowConfig.bits = 16;
 	memcpy( windowConfig.palette, palette, 32 );
 
 	//romfsInit();

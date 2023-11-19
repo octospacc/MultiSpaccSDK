@@ -5,6 +5,22 @@
 extern "C" {
 #endif
 
+#if defined(MultiSpacc_Target_SDL12)
+	#define MultiSpacc_SDLK_ESCAPE SDLK_ESCAPE
+	#define MultiSpacc_SDLK_TAB    SDLK_TAB
+	#define MultiSpacc_SDLK_UP     SDLK_UP
+	#define MultiSpacc_SDLK_DOWN   SDLK_DOWN
+	#define MultiSpacc_SDLK_LEFT   SDLK_LEFT
+	#define MultiSpacc_SDLK_RIGHT  SDLK_RIGHT
+#elif defined(MultiSpacc_Target_SDL20)
+	#define MultiSpacc_SDLK_ESCAPE SDL_SCANCODE_ESCAPE
+	#define MultiSpacc_SDLK_TAB    SDL_SCANCODE_TAB
+	#define MultiSpacc_SDLK_UP     SDL_SCANCODE_UP
+	#define MultiSpacc_SDLK_DOWN   SDL_SCANCODE_DOWN
+	#define MultiSpacc_SDLK_LEFT   SDL_SCANCODE_LEFT
+	#define MultiSpacc_SDLK_RIGHT  SDL_SCANCODE_RIGHT
+#endif
+
 #if defined(MultiSpacc_Target_Switch) && defined(MultiSpacc_Target_SDLCommon)
 	#define JOY_A     0
 	#define JOY_B     1
@@ -45,8 +61,7 @@ extern "C" {
 
 // Pause
 #if defined(MultiSpacc_Target_SDLCommon) && (defined(MultiSpacc_Target_PC) || defined(MultiSpacc_Target_Web))
-	//#define MultiSpacc_Key_Pause SDLK_ESCAPE
-	#define MultiSpacc_Key_Pause SDL_SCANCODE_ESCAPE
+	#define MultiSpacc_Key_Pause MultiSpacc_SDLK_ESCAPE
 #elif defined(MultiSpacc_Target_SDLCommon) && defined(MultiSpacc_Target_Switch)
 	#define MultiSpacc_Key_Pause JOY_PLUS
 #elif defined(MultiSpacc_Target_NDS)
@@ -57,8 +72,7 @@ extern "C" {
 
 // Select
 #if defined(MultiSpacc_Target_SDLCommon) && (defined(MultiSpacc_Target_PC) || defined(MultiSpacc_Target_Web))
-	// #define MultiSpacc_Key_Select SDLK_TAB
-	#define MultiSpacc_Key_Select SDL_SCANCODE_TAB
+	#define MultiSpacc_Key_Select MultiSpacc_SDLK_TAB
 #elif defined(MultiSpacc_Target_NDS)
 	#define MultiSpacc_Key_Select KEY_SELECT
 #elif defined(MultiSpacc_Target_NES)
@@ -67,14 +81,10 @@ extern "C" {
 
 // Directions
 #if defined(MultiSpacc_Target_SDLCommon) && (defined(MultiSpacc_Target_PC) || defined(MultiSpacc_Target_Web))
-	// #define MultiSpacc_Key_Up    SDLK_UP
-	// #define MultiSpacc_Key_Down  SDLK_DOWN
-	// #define MultiSpacc_Key_Left  SDLK_LEFT
-	// #define MultiSpacc_Key_Right SDLK_RIGHT
-	#define MultiSpacc_Key_Up    SDL_SCANCODE_UP
-	#define MultiSpacc_Key_Down  SDL_SCANCODE_DOWN
-	#define MultiSpacc_Key_Left  SDL_SCANCODE_LEFT
-	#define MultiSpacc_Key_Right SDL_SCANCODE_RIGHT
+	#define MultiSpacc_Key_Up    MultiSpacc_SDLK_UP
+	#define MultiSpacc_Key_Down  MultiSpacc_SDLK_DOWN
+	#define MultiSpacc_Key_Left  MultiSpacc_SDLK_LEFT
+	#define MultiSpacc_Key_Right MultiSpacc_SDLK_RIGHT
 #elif defined(MultiSpacc_Target_NDS)
 	// ...
 #elif defined(MultiSpacc_Target_NES)
@@ -91,7 +101,32 @@ extern "C" {
 	// #define MultiSpacc_Key_Cancel  ESC
 #endif
 
-bool MultiSpacc_CheckKey( int key, char pad );
+// typedef struct MultiSpacc_KeysStates {
+	// #if defined(MultiSpacc_Target_SDLCommon)
+		// const Uint8 *keysStates;
+	// #elif defined(MultiSpacc_Target_NDS)
+		// int keysStates;
+	// #elif defined(MultiSpacc_Target_NES)
+		// char keysStates;
+	// #endif
+// } MultiSpacc_KeysStates;
+
+typedef struct MultiSpacc_KeysStates {
+	#if defined(MultiSpacc_Target_SDLCommon)
+		Uint8 *keysPressed;
+		const Uint8 *keysHeld;
+	#elif defined(MultiSpacc_Target_NDS)
+	#elif defined(MultiSpacc_Target_NES)
+		char keysPressed;
+		char keysHeld;
+	#endif
+} MultiSpacc_KeysStates;
+
+//void MultiSpacc_PollButtons( char pad, MultiSpacc_KeysStates *buttonsPressed, MultiSpacc_KeysStates *buttonsHeld );
+//bool MultiSpacc_CheckButtonState( int button, MultiSpacc_KeysStates *buttonsStates );
+void MultiSpacc_PollButtons( char pad, MultiSpacc_KeysStates *keysStates );
+bool MultiSpacc_CheckKeyPress( int key, MultiSpacc_KeysStates *keysStates );
+bool MultiSpacc_CheckKeyHold( int key, MultiSpacc_KeysStates *keysStates );
 
 #ifdef __cplusplus
 }

@@ -9,6 +9,7 @@ All all:
 			"Target=WindowsPC MultiSpacc_Target=SDL20" \
 			"Target=Windows9x" \
 			"Target=Web" \
+			"Target=Switch" \
 			"Target=NDS" \
 			"Target=NES" \
 		; do \
