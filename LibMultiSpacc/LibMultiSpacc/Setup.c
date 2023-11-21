@@ -56,8 +56,8 @@ MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig *windowConfig 
 		return bottomScreen;
 
 	#elif defined(MultiSpacc_Target_NES)
-		windowConfig->width = 256;
-		windowConfig->height = 240;
+		windowConfig->width = MultiSpacc_StaticScreenWidth;
+		windowConfig->height = MultiSpacc_StaticScreenHeight;
 		oam_clear();
 		pal_all(windowConfig->palette);
 		ppu_on_all();

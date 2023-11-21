@@ -127,6 +127,16 @@ typedef struct MultiSpacc_MainLoopHandlerArgs {
 	Uint32 elapsedFixedTime;
 } MultiSpacc_MainLoopHandlerArgs;
 
+#if defined(MultiSpacc_Target_NES)
+	#define MultiSpacc_StaticScreenWidth 256
+	#define MultiSpacc_StaticScreenHeight 240
+	#define MultiSpacc_StaticScreenSizeNull false
+#else
+	#define MultiSpacc_StaticScreenWidth 0
+	#define MultiSpacc_StaticScreenHeight 0
+	#define MultiSpacc_StaticScreenSizeNull true
+#endif
+
 bool MultiSpacc_MainLoopHandler( MultiSpacc_MainLoopHandlerArgs *handlerArgs );
 
 MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig *windowConfig );

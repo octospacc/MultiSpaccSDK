@@ -16,7 +16,7 @@ apt install -y \
 ;
 
 curl -o /tmp/mingw32.7z https://hlb0.octt.eu.org/Drive/Misc/mingw32-9.2.0.7z.sfx.exe
-7z x /tmp/mingw32.7z
+7z x /tmp/mingw32.7z || true
 cp ./mingw32/bin/*.dll ./mingw32/libexec/gcc/mingw32/9.2.0/
 mv ./mingw32 /opt/Sdk/mingw32
 

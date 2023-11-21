@@ -1,5 +1,8 @@
 #include "../../LibMultiSpacc/MultiSpacc.h"
 
+#define iabs(x) (((x) >= 0) ? (x) : -(x))
+#define maxOf2(a, b) (((a + b) / 2) + (iabs(a - b) / 2))
+
 #define AppName "Pong"
 
 bool paused = false;
@@ -28,12 +31,13 @@ MultiSpacc_Surface *background;
 MultiSpacc_Surface *tilesImg;
 
 MultiSpacc_SpritesMap paddleSxSpriteMap, paddleDxSpriteMap;
-MultiSpacc_TilesMap divisorTileMap, borderTileMap;
+MultiSpacc_TilesMap divisorTileMap, borderTileMap, tempTileMap;
 
-#define BallSize 8
-#define PaddleWidth 8
+#define TileSize 8
+#define BallSize TileSize
+#define PaddleWidth TileSize
 #define PaddleHeightTl 4
-#define PaddleHeightPx 8*PaddleHeightTl
+#define PaddleHeightPx TileSize*PaddleHeightTl
 
 #define BallTile   128
 #define PaddleTile 129
@@ -49,9 +53,19 @@ MultiSpacc_TilesMap divisorTileMap, borderTileMap;
 #define PaddleDxX windowConfig.width - 2*PaddleWidth
 
 #define PaddleAccel 4
-#define PaddleMarginXPx 8
-#define PaddleMarginYPx 8
-#define ScreenMarginYPx 8
+#define PaddleMarginXPx TileSize
+#define PaddleMarginYPx TileSize
+#define ScreenMarginYPx TileSize
+
+#define StaticScreenMaxSidePx maxOf2(MultiSpacc_StaticScreenWidth, MultiSpacc_StaticScreenHeight)
+#define StaticScreenMaxSideTl (StaticScreenMaxSidePx/TileSize)
+
+#define RealScreenMaxSidePx maxOf2(windowConfig.width, windowConfig.height)
+#define RealScreenMaxSideTl (RealScreenMaxSidePx/TileSize)
+
+int tempX[StaticScreenMaxSideTl + MultiSpacc_StaticScreenSizeNull];
+int tempY[StaticScreenMaxSideTl + MultiSpacc_StaticScreenSizeNull];
+int tempChr[StaticScreenMaxSideTl + MultiSpacc_StaticScreenSizeNull];
 
 // TODO: more defines for frequently-used expressions
 
@@ -187,22 +201,45 @@ bool FixedUpdate( void *args )
 	return true;
 }
 
-// TODO: flip needed sprites, must implement flags in MultiSpacc API first
-// TODO: set metatile without cycle here
 bool DisplayBorders(void)
 {
 	int i;
 
-	for( i=1; i<(windowConfig.height/8 - 1); i++ )
+	if( MultiSpacc_StaticScreenSizeNull )
 	{
-		MultiSpacc_SetTile( windowConfig.width/8/2    , i, DivisorTileDx, tilesImg, background );
-		MultiSpacc_SetTile( windowConfig.width/8/2 - 1, i, DivisorTileSx, tilesImg, background );
+		tempTileMap.chr = malloc(RealScreenMaxSideTl * sizeof(int));
+		tempTileMap.x = malloc(RealScreenMaxSideTl * sizeof(int));
+		tempTileMap.y = malloc(RealScreenMaxSideTl * sizeof(int));
 	}
 
-	for( i=0; i<windowConfig.width/8; i++ )
+	for( i=1; i<(windowConfig.height/TileSize - 1); i++ )
 	{
-		MultiSpacc_SetTile( i,                         1, BorderTile, tilesImg, background );
-		MultiSpacc_SetTile( i, windowConfig.height/8 - 2, BorderTile, tilesImg, background );
+		tempTileMap.chr[i] = DivisorTileSx;
+		tempTileMap.x[i] = 0;
+		tempTileMap.y[i] = i;
+	}
+	MultiSpacc_SetMetaTile( windowConfig.width/TileSize/2 - 1, 0, &tempTileMap, windowConfig.height/TileSize, tilesImg, background );
+
+	for( i=1; i<(windowConfig.height/TileSize - 1); i++ )
+	{
+		tempTileMap.chr[i] = DivisorTileDx;
+	}
+	MultiSpacc_SetMetaTile( windowConfig.width/TileSize/2 - 0, 0, &tempTileMap, windowConfig.height/TileSize, tilesImg, background );
+
+	for( i=0; i<windowConfig.width/TileSize; i++ )
+	{
+		tempTileMap.chr[i] = BorderTile;
+		tempTileMap.x[i] = i;
+		tempTileMap.y[i] = 0;
+	}
+	MultiSpacc_SetMetaTile( 0,                                1, &tempTileMap, windowConfig.width/TileSize, tilesImg, background );
+	MultiSpacc_SetMetaTile( 0, windowConfig.height/TileSize - 2, &tempTileMap, windowConfig.width/TileSize, tilesImg, background );
+
+	if( MultiSpacc_StaticScreenSizeNull )
+	{
+		free(tempTileMap.chr);
+		free(tempTileMap.x);
+		free(tempTileMap.y);
 	}
 }
 
@@ -233,7 +270,6 @@ bool RealUpdate( void *args, double deltaTime )
 	}
 
 	// TODO: listen for OS terminate signal
-	// TODO: fix SDL not waiting for key release with inputs checked this way
 	// TODO: proper pause menu?
 	if( MultiSpacc_CheckKeyPress( MultiSpacc_Key_Pause, &buttonsStates ) )
 	{
@@ -244,7 +280,7 @@ bool RealUpdate( void *args, double deltaTime )
 		}
 		else
 		{
-			MultiSpacc_PrintText( "Exit", background, &windowConfig, 3, 3, tilesImg );
+			MultiSpacc_PrintText( "Exited.", background, &windowConfig, 3, 3, tilesImg );
 			return false;
 		}
 	}
@@ -278,6 +314,10 @@ int main( int argc, char *argv[] )
 	paddleSxSpriteMap.flags = (MultiSpacc_SpriteFlags*)&flagsSx;
 	paddleDxSpriteMap.flags = (MultiSpacc_SpriteFlags*)&flagsDx;
 
+	tempTileMap.chr = tempChr;
+	tempTileMap.x = tempX;
+	tempTileMap.y = tempY;
+
 	windowConfig.width = 320;
 	windowConfig.height = 240;
 	memcpy( windowConfig.palette, palette, 32 );
@@ -300,23 +340,6 @@ int main( int argc, char *argv[] )
 	if( tilesImg == NULL )
 	{
 		return -1;
-	}
-
-	// divisorTileMap.chr = malloc(windowConfig.height/8 * sizeof(int*));
-	// divisorTileMap.x = malloc(windowConfig.height/8 * sizeof(int*));
-	// divisorTileMap.y = malloc(windowConfig.height/8 * sizeof(int*));
-	// borderTileMap.chr = malloc(windowConfig.height/8 * sizeof(int*));
-	// borderTileMap.x = malloc(windowConfig.height/8 * sizeof(int*));
-	// borderTileMap.y = malloc(windowConfig.height/8 * sizeof(int*));
-
-	for( i=0; i<windowConfig.height/8; i++ )
-	{
-		//divisorTileMap.chr[i] = DivisorTile;
-		// divisorTileMap.x[i] = windowConfig.width/2;
-		// divisorTileMap.y[i] = 0;
-		// borderTileMap.chr[i] = BorderTile;
-		// borderTileMap.x[i] = 0;
-		// borderTileMap.y[i] = 8;
 	}
 
 	DisplayBorders();
