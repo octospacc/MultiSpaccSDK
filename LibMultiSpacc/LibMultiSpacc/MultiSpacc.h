@@ -45,7 +45,6 @@ extern "C" {
 #endif
 
 #ifdef MultiSpacc_Target_SDLCommon
-	#define MultiSpacc_Init SDL_Init
 	#define MultiSpacc_Surface SDL_Surface
 	#define MultiSpacc_GetTicks SDL_GetTicks
 #endif
@@ -137,7 +136,13 @@ typedef struct MultiSpacc_MainLoopHandlerArgs {
 	#define MultiSpacc_StaticScreenSizeNull true
 #endif
 
-bool MultiSpacc_MainLoopHandler( MultiSpacc_MainLoopHandlerArgs *handlerArgs );
+#if defined(MultiSpacc_Target_NES)
+	#define MultiSpacc_SystemClockAvailable false
+#else
+	#define MultiSpacc_SystemClockAvailable true
+#endif
+
+bool MultiSpacc_InitSystem(void);
 
 MultiSpacc_Window *MultiSpacc_SetWindow( MultiSpacc_SurfaceConfig *windowConfig );
 MultiSpacc_Surface *MultiSpacc_GetWindowSurface( MultiSpacc_Window *Window );
@@ -146,6 +151,7 @@ void MultiSpacc_SetAppTitle( MultiSpacc_Window *Window, const char Title[] );
 void MultiSpacc_SetAppIcon( MultiSpacc_Window *Window, MultiSpacc_Surface *Icon );
 
 bool MultiSpacc_SetMainLoop( bool functionFixedUpdate( void *args ), bool functionRealUpdate( void *args, double deltaTime ), void *args );
+bool MultiSpacc_MainLoopHandler( MultiSpacc_MainLoopHandlerArgs *handlerArgs );
 
 MultiSpacc_Surface *MultiSpacc_LoadImage( char FilePath[], MultiSpacc_Surface *Screen, Uint32 *ColorKey );
 int MultiSpacc_SetColorKey( MultiSpacc_Surface *Surface, bool Flag, Uint32 Key );

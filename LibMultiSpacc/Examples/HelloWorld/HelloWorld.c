@@ -88,6 +88,8 @@ int main( int argc, char *argv[] )
 	windowConfig.height = 240;
 	memcpy( windowConfig.palette, palette, 32 );
 
+	MultiSpacc_InitSystem();
+	// TODO: integrate into LibMultiSpacc and make cross-platform to change into current directory
 	//romfsInit();
 	//chdir("romfs:/");
 
@@ -109,6 +111,7 @@ int main( int argc, char *argv[] )
 	margs.tilesImg = MultiSpacc_LoadImage( "./Assets/CHARS.png", margs.background, NULL );
 	if( margs.tilesImg == NULL )
 	{
+		MultiSpacc_PrintDebug("[E] Error Loading tilesImg (%s).\n", TilesImgFile);
 		return -1;
 	}
 

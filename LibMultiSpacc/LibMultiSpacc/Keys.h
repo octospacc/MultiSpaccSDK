@@ -7,6 +7,7 @@ extern "C" {
 
 #if defined(MultiSpacc_Target_SDL12)
 	#define MultiSpacc_SDLK_ESCAPE SDLK_ESCAPE
+	#define MultiSpacc_SDLK_RETURN SDLK_RETURN
 	#define MultiSpacc_SDLK_TAB    SDLK_TAB
 	#define MultiSpacc_SDLK_UP     SDLK_UP
 	#define MultiSpacc_SDLK_DOWN   SDLK_DOWN
@@ -14,6 +15,7 @@ extern "C" {
 	#define MultiSpacc_SDLK_RIGHT  SDLK_RIGHT
 #elif defined(MultiSpacc_Target_SDL20)
 	#define MultiSpacc_SDLK_ESCAPE SDL_SCANCODE_ESCAPE
+	#define MultiSpacc_SDLK_RETURN SDL_SCANCODE_RETURN
 	#define MultiSpacc_SDLK_TAB    SDL_SCANCODE_TAB
 	#define MultiSpacc_SDLK_UP     SDL_SCANCODE_UP
 	#define MultiSpacc_SDLK_DOWN   SDL_SCANCODE_DOWN
@@ -45,7 +47,9 @@ extern "C" {
 #endif
 
 // Confirm
-#if defined(MultiSpacc_Target_NES)
+#if defined(MultiSpacc_Target_SDLCommon) && (defined(MultiSpacc_Target_PC) || defined(MultiSpacc_Target_Web))
+	#define MultiSpacc_Key_Confirm MultiSpacc_SDLK_RETURN
+#elif defined(MultiSpacc_Target_NES)
 	#define MultiSpacc_Key_Confirm PAD_A
 #endif
 
@@ -86,7 +90,10 @@ extern "C" {
 	#define MultiSpacc_Key_Left  MultiSpacc_SDLK_LEFT
 	#define MultiSpacc_Key_Right MultiSpacc_SDLK_RIGHT
 #elif defined(MultiSpacc_Target_NDS)
-	// ...
+	#define MultiSpacc_Key_Up    KEY_UP
+	#define MultiSpacc_Key_Down  KEY_DOWN
+	#define MultiSpacc_Key_Left  KEY_LEFT
+	#define MultiSpacc_Key_Right KEY_RIGHT
 #elif defined(MultiSpacc_Target_NES)
 	#define MultiSpacc_Key_Up    PAD_UP
 	#define MultiSpacc_Key_Down  PAD_DOWN
@@ -97,33 +104,22 @@ extern "C" {
 #if defined(MultiSpacc_Target_SDLCommon) && (defined(MultiSpacc_Target_PC) || defined(MultiSpacc_Target_Web))
 	// #define MultiSpacc_Key_Action1 SPACE
 	// #define MultiSpacc_Key_Action2 SHIFT
-	// #define MultiSpacc_Key_Confirm ENTER
 	// #define MultiSpacc_Key_Cancel  ESC
 #endif
-
-// typedef struct MultiSpacc_KeysStates {
-	// #if defined(MultiSpacc_Target_SDLCommon)
-		// const Uint8 *keysStates;
-	// #elif defined(MultiSpacc_Target_NDS)
-		// int keysStates;
-	// #elif defined(MultiSpacc_Target_NES)
-		// char keysStates;
-	// #endif
-// } MultiSpacc_KeysStates;
 
 typedef struct MultiSpacc_KeysStates {
 	#if defined(MultiSpacc_Target_SDLCommon)
 		Uint8 *keysPressed;
 		const Uint8 *keysHeld;
 	#elif defined(MultiSpacc_Target_NDS)
+		int keysPressed;
+		int keysHeld;
 	#elif defined(MultiSpacc_Target_NES)
 		char keysPressed;
 		char keysHeld;
 	#endif
 } MultiSpacc_KeysStates;
 
-//void MultiSpacc_PollButtons( char pad, MultiSpacc_KeysStates *buttonsPressed, MultiSpacc_KeysStates *buttonsHeld );
-//bool MultiSpacc_CheckButtonState( int button, MultiSpacc_KeysStates *buttonsStates );
 void MultiSpacc_PollButtons( char pad, MultiSpacc_KeysStates *keysStates );
 bool MultiSpacc_CheckKeyPress( int key, MultiSpacc_KeysStates *keysStates );
 bool MultiSpacc_CheckKeyHold( int key, MultiSpacc_KeysStates *keysStates );

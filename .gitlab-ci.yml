@@ -1,12 +1,12 @@
 image: debian:latest
 
 before_script: |
-  sh ./Tools/InstallBuildEnvironment.sh
+  bash ./Tools/InstallBuildEnvironment.sh
 
 Tests:
   stage: build
   script: |
-    . .env
+    source .env
     make -j$(nproc --all)
   rules:
     - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH

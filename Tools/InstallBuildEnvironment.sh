@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 #[ "$(whoami)" != root ] && {
-#	echo "This script must run as root".
+	echo "This script must probably run as root".
 #	exit -1
 #}
 
@@ -35,4 +35,4 @@ export DEVKITARM=/opt/devkitpro/devkitARM
 export DEVKITPPC=/opt/devkitpro/devkitPPC
 [EOF]
 
-. .env
+source .env

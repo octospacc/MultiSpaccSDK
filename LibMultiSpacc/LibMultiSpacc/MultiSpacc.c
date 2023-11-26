@@ -1,5 +1,13 @@
 #include "./MultiSpacc.h"
 
+bool MultiSpacc_InitSystem(void)
+{
+	#if defined(MultiSpacc_Target_SDLCommon)
+		SDL_Init(SDL_INIT_EVERYTHING);
+	#endif
+	return true;
+}
+
 MultiSpacc_Surface *MultiSpacc_GetWindowSurface( MultiSpacc_Window *Window )
 {
 	#if defined(MultiSpacc_Target_SDL12)

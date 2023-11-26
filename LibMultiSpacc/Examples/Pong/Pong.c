@@ -1,9 +1,9 @@
 #include "../../LibMultiSpacc/MultiSpacc.h"
 
+#define AppName "Pong"
+
 #define iabs(x) (((x) >= 0) ? (x) : -(x))
 #define maxOf2(a, b) (((a + b) / 2) + (iabs(a - b) / 2))
-
-#define AppName "Pong"
 
 bool paused = false;
 int scoreSx = 0;
@@ -322,6 +322,7 @@ int main( int argc, char *argv[] )
 	windowConfig.height = 240;
 	memcpy( windowConfig.palette, palette, 32 );
 
+	MultiSpacc_InitSystem();
 	window = MultiSpacc_SetWindow( &windowConfig );
 	screen = MultiSpacc_GetWindowSurface( window );
 	background = MultiSpacc_CreateSurface( &windowConfig );
@@ -332,13 +333,13 @@ int main( int argc, char *argv[] )
 	};
 
 	MultiSpacc_SetAppTitle( window, AppName );
-	MultiSpacc_PrintDebug("[I] Ready!\n");
 
 	// Bitmap font forked from: <https://github.com/nesdoug/01_Hello/blob/master/Alpha.chr>
 	// Original copyright (c) 2018 Doug Fraker www.nesdoug.com (MIT)
 	tilesImg = MultiSpacc_LoadImage( "./Assets/CHARS.png", screen, NULL );
 	if( tilesImg == NULL )
 	{
+		MultiSpacc_PrintDebug("[E] Error Loading tilesImg (%s).\n", TilesImgFile);
 		return -1;
 	}
 
@@ -347,5 +348,6 @@ int main( int argc, char *argv[] )
 	paddleSxY = windowConfig.height/2 - PaddleHeightPx;
 	paddleDxY = windowConfig.height/2 - PaddleHeightPx;
 
+	MultiSpacc_PrintDebug("[I] Ready!\n");
 	return MultiSpacc_SetMainLoop( FixedUpdate, RealUpdate, NULL );
 }
